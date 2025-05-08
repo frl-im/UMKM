@@ -14,3 +14,7 @@ Proyek ini bertujuan membantu UMKM memasarkan produk mereka secara online.
 - Produk Unggulan
 - Detail Produk
 #LUVITAM
+#TOOLS
+- HTML
+- CSS
+- JAVASCRIPT
