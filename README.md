@@ -13,7 +13,6 @@ Proyek ini bertujuan membantu UMKM memasarkan produk mereka secara online.
 - Keranjang belanja
 - Produk Unggulan
 - Detail Produk
-# LUVITAM
 # TOOLS
 - HTML
 - CSS
