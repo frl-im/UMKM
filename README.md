@@ -9,7 +9,7 @@ Di tengah perkembangan zaman modern yang serba digital, website ini hadir sebaga
 - Halaman Detail Produk
 - Halaman Profil UMKM
 - Halaman Kontak atau Tentang Kami
-- 
+  
 # FITUR TAMBAHAN
 - Filter Produk Berdasarkan Kategori
 - Pencarian Produk
