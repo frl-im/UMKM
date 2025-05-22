@@ -6,13 +6,13 @@ Di tengah perkembangan zaman modern yang serba digital, website ini hadir sebaga
 # FITUR 
 - Beranda
 - Halaman Kategori Produk
-- Halaman Detail Produk (belum)
+- Halaman Detail Produk 
 - Halaman Kontak atau Tentang Kami 
   
 # FITUR TAMBAHAN
 - Filter Produk Berdasarkan Kategori 
 - Pencarian Produk
-- Keranjang belanja (belum)
+- Keranjang belanja 
 - Detail Produk
   
 # TOOLS
