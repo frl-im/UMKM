@@ -6,7 +6,8 @@ Di tengah perkembangan zaman modern yang serba digital, website ini hadir sebaga
 # FITUR 
 - Beranda
 - Halaman Kategori Produk
-- Halaman Detail Produk 
+- Halaman Detail Produk
+- Produk Unggulan
 - Halaman Kontak atau Tentang Kami 
   
 # FITUR TAMBAHAN
