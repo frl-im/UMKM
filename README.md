@@ -7,7 +7,7 @@ Di tengah perkembangan zaman modern yang serba digital, website ini hadir sebaga
 - Beranda
 - Halaman Kategori Produk
 - Halaman Detail Produk
-- Produk Unggulan
+- Rekomendasi Produk Unggulan
 - Halaman Kontak atau Tentang Kami 
   
 # FITUR TAMBAHAN
