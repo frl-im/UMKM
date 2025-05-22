@@ -10,8 +10,9 @@ Di tengah perkembangan zaman modern yang serba digital, website ini hadir sebaga
 - Halaman Kontak atau Tentang Kami 
   
 # FITUR TAMBAHAN
-- Filter Produk Berdasarkan Kategori 
 - Pencarian Produk
+- Filter Produk Berdasarkan Kategori
+- Filter Produk Berdasarkan Asal Daerah
 - Keranjang belanja 
 - Detail Produk
   
