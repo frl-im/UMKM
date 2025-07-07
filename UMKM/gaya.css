@@ -181,12 +181,34 @@ a-content:hover {
 
 /* Responsif */
 @media (max-width: 768px) {
-  .navbar .nav-links {
+  ul-navbar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    gap: 1rem;
   }
 
-  .navbar .nav-links li {
-    margin: 0.5rem 0;
+  .container-content p {
+    padding: 0 1rem;
+    font-size: 1rem;
+  }
+
+  .category-grid,
+  .product-gird {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h2 {
+    font-size: 1.8rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .hero .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
   }
 }
+
+
