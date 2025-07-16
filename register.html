@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daftar Akun - KreasiLokal.id</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"> <style>
+    /* Menambahkan beberapa style dasar jika tidak ada di style.css */
+    body { background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .register-selection-container { max-width: 800px; background: #fff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 2rem; }
+    .header-section { text-align: center; margin-bottom: 2rem; }
+    .register-options { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .register-option { border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; text-align: center; transition: all 0.3s ease; }
+    .register-option:hover { transform: translateY(-5px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+    .option-icon { font-size: 3rem; color: #2e8b57; margin-bottom: 1rem; }
+    .register-btn { display: block; width: 100%; padding: 0.75rem; border: none; background-color: #ff8c00; color: white; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 1rem; }
+    .login-section { text-align: center; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+
+  <div class="register-selection-container">
+    <div class="header-section">
+      <h1>Buat Akun Baru</h1>
+      <p>Bergabunglah dengan komunitas KreasiLokal.id</p>
+    </div>
+
+    <div class="register-options">
+      <div class="register-option">
+        <div class="option-icon">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <h3>Saya ingin Berbelanja</h3>
+        <p>Daftar sebagai pembeli untuk menemukan dan membeli produk unik.</p>
+        <a href="register-pembeli.html" class="register-btn">
+          Daftar sebagai Pembeli
+        </a>
+      </div>
+
+      <div class="register-option">
+        <div class="option-icon">
+          <i class="fas fa-store"></i>
+        </div>
+        <h3>Saya ingin Berjualan</h3>
+        <p>Daftar sebagai penjual untuk menjangkau ribuan pelanggan.</p>
+        <a href="register-penjual.html" class="register-btn">
+          Daftar sebagai Penjual
+        </a>
+      </div>
+    </div>
+
+    <div class="login-section">
+      <p>Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
+    </div>
+  </div>
+
+</body>
+</html>
