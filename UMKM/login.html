@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - KreasiLokal.id</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <nav>
+      <div>
+        <a href="index.html">
+          <i class="fas fa-leaf"></i>
+          KreasiLokal.id
+        </a>
+      </div>
+      <div>
+        <a href="index.html">Kembali ke Beranda</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="login-selection-container">
+    <div class="login-selection-box">
+      <div class="header-section">
+        <h1>Selamat Datang di KreasiLokal.id</h1>
+        <p>Pilih jenis akun untuk melanjutkan</p>
+      </div>
+
+      <div class="login-options">
+        <div class="login-option">
+          <div class="option-icon">
+            <i class="fas fa-shopping-bag"></i>
+          </div>
+          <div class="option-content">
+            <h3>Pembeli</h3>
+            <p>Belanja produk tradisional Indonesia dengan mudah</p>
+            <ul>
+              <li><i class="fas fa-check"></i> Akses ke ribuan produk tradisional</li>
+              <li><i class="fas fa-check"></i> Wishlist dan tracking pesanan</li>
+              <li><i class="fas fa-check"></i> Promo dan diskon eksklusif</li>
+              <li><i class="fas fa-check"></i> Poin reward setiap pembelian</li>
+            </ul>
+          </div>
+          <button class="login-btn pembeli-btn" onclick="window.location.href='loginpembeli.html'">
+            <i class="fas fa-sign-in-alt"></i>
+            Login sebagai Pembeli
+          </button>
+        </div>
+
+        <div class="login-option">
+          <div class="option-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <div class="option-content">
+            <h3>Penjual</h3>
+            <p>Jual produk tradisional Anda ke seluruh Indonesia</p>
+            <ul>
+              <li><i class="fas fa-check"></i> Dashboard analytics lengkap</li>
+              <li><i class="fas fa-check"></i> Manajemen produk & inventory</li>
+              <li><i class="fas fa-check"></i> Sistem pembayaran terintegrasi</li>
+              <li><i class="fas fa-check"></i> Dukungan marketing tools</li>
+            </ul>
+          </div>
+          <button class="login-btn penjual-btn" onclick="window.location.href='loginpenjual.html'">
+            <i class="fas fa-sign-in-alt"></i>
+            Login sebagai Penjual
+          </button>
+        </div>
+      </div>
+
+      <div class="register-section">
+        <h3>Belum punya akun?</h3>
+        <div class="register-buttons">
+          <button class="register-btn" onclick="window.location.href='register-pembeli.html'">
+            <i class="fas fa-user-plus"></i>
+            Daftar sebagai Pembeli
+          </button>
+          <button class="register-btn" onclick="window.location.href='register-penjual.html'">
+            <i class="fas fa-store"></i>
+            Daftar sebagai Penjual
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <h3>Bergabung dengan Komunitas KreasiLokal.id</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <h4>10,000+</h4>
+            <p>Pembeli Aktif</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <div class="stat-content">
+            <h4>500+</h4>
+            <p>Toko Terdaftar</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="stat-content">
+            <h4>2,000+</h4>
+            <p>Produk Terjual</p>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">
+            <i class="fas fa-map-marked-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h4>34</h4>
+            <p>Provinsi</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <p>&copy; 2025 KreasiLokal.id. Hak cipta dilindungi undang-undang.</p>
+      <div>
+        <a href="#">Kebijakan Privasi</a>
+        <a href="#">Syarat & Ketentuan</a>
+        <a href="#">Bantuan</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Animation on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginOptions = document.querySelectorAll('.login-option');
+      const statItems = document.querySelectorAll('.stat-item');
+      
+      // Animate login options
+      loginOptions.forEach((option, index) => {
+        setTimeout(() => {
+          option.style.opacity = '1';
+          option.style.transform = 'translateY(0)';
+        }, index * 200);
+      });
+
+      // Animate stats
+      statItems.forEach((item, index) => {
+        setTimeout(() => {
+          item.style.opacity = '1';
+          item.style.transform = 'translateY(0)';
+        }, 500 + (index * 100));
+      });
+    });
+
+    // Button hover effects
+    const buttons = document.querySelectorAll('.login-btn, .register-btn');
+    
+    buttons.forEach(btn => {
+      btn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+      });
+      
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+      });
+    });
+  </script>
+</body>
+</html>
