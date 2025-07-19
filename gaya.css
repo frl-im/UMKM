@@ -46,7 +46,7 @@ body {
 }
 
 .container-content {
-  text-align: center:
+  text-align: center;
   margin: 3rem 0;
 }
 
@@ -57,7 +57,7 @@ body {
   font-weight: bold;
 }
 
-a-content:hover {
+.a-content:hover {
   color: #ff8c00;
 }
 
@@ -71,6 +71,7 @@ a-content:hover {
 
 .h1-footer {
   font-size: 1.5rem;
+}
 
 /* Hero Section */
 .hero {
@@ -181,7 +182,7 @@ a-content:hover {
 
 /* Responsif */
 @media (max-width: 768px) {
-  ul-navbar {
+  .ul-navbar {
     flex-direction: column;
     align-items: center;
     gap: 1rem;
@@ -193,7 +194,7 @@ a-content:hover {
   }
 
   .category-grid,
-  .product-gird {
+  .product-grid {
     grid-template-columns: 1fr;
   }
 

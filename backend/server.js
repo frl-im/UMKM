@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = 3000;
-const umkmRoutes = require("./routes/umkmRoutes");
+const umkmRoutes = require("./Routes");
 
 app.use(cors());
 app.use(express.json());
