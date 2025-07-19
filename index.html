@@ -4,548 +4,280 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KreasiLokal.id - Tradisi Bertemu Inovasi</title>
-  <link rel="stylesheet" href="style.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Reset CSS & Font Dasar */
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    .container {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* 1. Header Baru */
+    .navbar {
+      background-color: #ffffff;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar .logo a {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2e8b57;
+      text-decoration: none;
+    }
+    .main-search-bar {
+      flex-grow: 1;
+      margin: 0 2rem;
+      display: flex;
+    }
+    .main-search-bar input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #2e8b57;
+      border-right: none;
+      border-radius: 5px 0 0 5px;
+      font-size: 1rem;
+    }
+    .main-search-bar button {
+      padding: 0 1.2rem;
+      border: none;
+      background-color: #2e8b57;
+      color: white;
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .nav-icons a {
+      font-size: 1.5rem;
+      color: #555;
+      text-decoration: none;
+      margin-left: 1.5rem;
+    }
+    
+    /* 2. Banner & Ikon Navigasi */
+    .promo-banner-container { padding: 20px 0; background-color: white; }
+    .quick-nav-icons { padding: 20px 0; background-color: white; border-bottom: 10px solid #f4f4f4; }
+    .quick-nav-icons .container {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+    .quick-nav-item { text-decoration: none; color: #333; }
+    .quick-nav-item i { font-size: 2rem; color: #2e8b57; display: block; margin-bottom: 8px; }
+
+    /* 3. Flash Sale */
+    .flash-sale { padding: 20px 0; background-color: white; margin-bottom: 10px; }
+    .flash-sale-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .flash-sale-header h3 { font-size: 1.5rem; color: #ff8c00; margin: 0; }
+    .countdown-timer { margin-left: 1rem; font-weight: bold; }
+    .see-all { margin-left: auto; text-decoration: none; color: #007bff; }
+    
+    /* 4. Product Card yang Lebih Baik */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .product-card {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      overflow: hidden;
+      text-decoration: none;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .product-image { position: relative; }
+    .product-image img { width: 100%; display: block; }
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      right: -1px;
+      background-color: rgba(255, 140, 0, 0.9);
+      color: white;
+      padding: 5px 8px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      border-radius: 3px 0 0 3px;
+    }
+    .product-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
+    .product-info h4 { font-size: 0.9rem; margin: 0 0 5px 0; height: 40px; }
+    .product-price { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+    .current-price { color: #ff8c00; font-weight: bold; font-size: 1.1rem; }
+    .original-price { text-decoration: line-through; color: #aaa; font-size: 0.8rem; }
+    .product-origin { font-size: 0.8rem; color: #777; }
+    .stock-bar {
+      height: 18px;
+      background-color: #ffc107;
+      border-radius: 9px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: white;
+      font-weight: bold;
+      line-height: 18px;
+      margin-top: auto;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* Section Headers */
+    .section-header { padding: 20px 0 10px 0; font-size: 1.2rem; color: #555; border-bottom: 2px solid #2e8b57; margin-bottom: 20px; text-transform: uppercase; }
+  </style>
 </head>
 <body>
-  <nav class="navbar">
+
+  <header class="navbar">
     <div class="container">
-      <h1 class="logo">
-        <i class="fas fa-leaf"></i>
-        KreasiLokal.id
-      </h1>
-      <ul class="nav-links">
-        <li><a href="#beranda">Beranda</a></li>
-        <li><a href="login.html">Login</a></li>
-        <li><a href="#kategori">Kategori</a></li>
-        <li><a href="#produk">Produk</a></li>
-        <li><a href="#tentang">Tentang</a></li>
-        <li><a href="#kontak">Kontak</a></li>
-      </ul>
+      <div class="logo">
+        <a href="index.html"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
+      </div>
+      <div class="main-search-bar">
+          <input type="text" placeholder="Cari batik, rendang, atau ukiran...">
+          <button><i class="fas fa-search"></i></button>
+      </div>
       <div class="nav-icons">
-        <i class="fas fa-search"></i>
-        <i class="fas fa-shopping-cart"></i>
-        <span class="cart-count">0</span>
+        <a href="login.html" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+        <a href="keranjang.html" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <section class="hero" id="beranda">
-    <div class="hero-overlay"></div>
-    <div class="container">
-      <div class="hero-content">
-        <h2>Tradisi Bertemu Inovasi</h2>
-        <p>Temukan koleksi eksklusif produk tradisional Indonesia yang dipadu dengan sentuhan modern untuk kehidupan masa kini.</p>
-        <div class="hero-buttons">
-          <a href="#kategori" class="btn btn-primary">Jelajahi Koleksi</a>
-          <a href="#tentang" class="btn btn-outline">Pelajari Lebih Lanjut</a>
-        </div>
+  <main>
+    <section class="promo-banner-container">
+      <div class="container">
+        <img src="https://via.placeholder.com/1170x350/2e8b57/ffffff?text=Promo+Spesial+Produk+Lokal" alt="Promo Utama" style="width: 100%; border-radius: 5px;">
       </div>
-      <div class="hero-stats">
-        <div class="stat-item">
-          <h3>500+</h3>
-          <p>Produk Tersedia</p>
-        </div>
-        <div class="stat-item">
-          <h3>50+</h3>
-          <p>Artisan Partner</p>
-        </div>
-        <div class="stat-item">
-          <h3>34</h3>
-          <p>Provinsi</p>
-        </div>
+    </section>
+
+    <section class="quick-nav-icons">
+      <div class="container">
+          <a href="voucher.html" class="quick-nav-item">
+              <i class="fas fa-tags"></i>
+              <span>Voucher</span>
+          </a>
+          <a href="flashsale.html" class="quick-nav-item">
+              <i class="fas fa-bolt"></i>
+              <span>Flash Sale</span>
+          </a>
+          <a href="tokopilihan.html" class="quick-nav-item">
+              <i class="fas fa-store"></i>
+              <span>Toko Pilihan</span>
+          </a>
+          <a href="#" class="quick-nav-item">
+              <i class="fas fa-tshirt"></i>
+              <span>Fashion Lokal</span>
+          </a>
+          <a href="#" class="quick-nav-item">
+              <i class="fas fa-cookie-bite"></i>
+              <span>Kuliner</span>
+          </a>
+          <a href="#" class="quick-nav-item">
+              <i class="fas fa-palette"></i>
+              <span>Kerajinan</span>
+          </a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="categories" id="kategori">
-    <div class="container">
-      <div class="section-header">
-        <h3>Kategori Produk</h3>
-        <p>Jelajahi beragam produk tradisional dengan sentuhan inovasi modern</p>
+    <section class="flash-sale" id="flash-sale">
+      <div class="container">
+          <div class="flash-sale-header">
+              <h3>FLASH SALE</h3>
+              <div class="countdown-timer">
+                  <span id="countdown">02:28:45</span>
+              </div>
+              <a href="flashsale.html" class="see-all">Lihat Semua ></a>
+          </div>
+          <div class="product-grid">
+              <a href="#" class="product-card">
+                <div class="product-badge">-53%</div>
+                <div class="product-image">
+                  <img src="https://via.placeholder.com/300x300/654321/ffffff?text=Lampu+Anyaman" alt="Lampu Anyaman" />
+                </div>
+                <div class="product-info">
+                  <h4>Lampu Gantung Anyaman Bambu</h4>
+                  <div class="product-price">
+                    <span class="current-price">Rp 129.250</span>
+                    <span class="original-price">Rp 275.000</span>
+                  </div>
+                  <div class="stock-bar">TERJUAL 50%</div>
+                </div>
+              </a>
+              </div>
       </div>
-      <div class="category-grid">
-        <div class="category-card" data-category="kerajinan">
-          <div class="category-icon">
-            <i class="fas fa-palette"></i>
-          </div>
-          <h4>Kerajinan Tradisional</h4>
-          <p>Batik, tenun, ukir kayu, keramik dengan desain kontemporer</p>
-          <span class="product-count">120 produk</span>
-        </div>
-        <div class="category-card" data-category="makanan">
-          <div class="category-icon">
-            <i class="fas fa-cookie-bite"></i>
-          </div>
-          <h4>Makanan Tradisional</h4>
-          <p>Jajanan tradisional, bumbu nusantara, kemasan modern</p>
-          <span class="product-count">85 produk</span>
-        </div>
-        <div class="category-card" data-category="fashion">
-          <div class="category-icon">
-            <i class="fas fa-tshirt"></i>
-          </div>
-          <h4>Fashion Heritage</h4>
-          <p>Pakaian tradisional dengan twist modern untuk daily wear</p>
-          <span class="product-count">95 produk</span>
-        </div>
-        <div class="category-card" data-category="dekorasi">
-          <div class="category-icon">
-            <i class="fas fa-home"></i>
-          </div>
-          <h4>Dekorasi & Furniture</h4>
-          <p>Furniture tradisional, dekorasi rumah, accent pieces</p>
-          <span class="product-count">65 produk</span>
-        </div>
-        <div class="category-card" data-category="teknologi">
-          <div class="category-icon">
-            <i class="fas fa-mobile-alt"></i>
-          </div>
-          <h4>Tech Heritage</h4>
-          <p>Gadget accessories dengan motif tradisional</p>
-          <span class="product-count">45 produk</span>
-        </div>
-        <div class="category-card" data-category="minuman">
-          <div class="category-icon">
-            <i class="fas fa-mug-hot"></i>
-          </div>
-          <h4>Minuman Tradisional</h4>
-          <p>Kopi nusantara, teh herbal, minuman fermentasi</p>
-          <span class="product-count">55 produk</span>
-        </div>
+    </section>
+
+    <section class="recommendations">
+      <div class="container">
+        <div class="section-header">Rekomendasi</div>
+        <div class="product-grid">
+          <a href="#" class="product-card">
+              <div class="product-badge">-18%</div>
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x300/2e8b57/ffffff?text=Batik+Modern" alt="Batik Modern Dress" />
+              </div>
+              <div class="product-info">
+                <h4>Dress Batik Modern Kawung</h4>
+                <div class="product-price">
+                  <span class="current-price">Rp 450.000</span>
+                  <span class="original-price">Rp 550.000</span>
+                </div>
+                <p class="product-origin">Yogyakarta</p>
+              </div>
+          </a>
+          <a href="#" class="product-card">
+              <div class="product-image">
+                <img src="https://via.placeholder.com/300x300/ff8c00/ffffff?text=Rendang+Instant" alt="Rendang" />
+              </div>
+              <div class="product-info">
+                <h4>Rendang Instant Premium</h4>
+                <div class="product-price">
+                  <span class="current-price">Rp 85.000</span>
+                </div>
+                <p class="product-origin">Sumatera Barat</p>
+              </div>
+          </a>
+           </div>
       </div>
-    </div>
-  </section>
-
-  <section class="featured-products" id="produk">
-    <div class="container">
-      <div class="section-header">
-        <h3>Produk Unggulan</h3>
-        <p>Koleksi terpilih dari artisan terbaik Indonesia</p>
-      </div>
-      
-      <div class="product-filter">
-        <button class="filter-btn active" data-filter="all">Semua</button>
-        <button class="filter-btn" data-filter="terbaru">Terbaru</button>
-        <button class="filter-btn" data-filter="terlaris">Terlaris</button>
-        <button class="filter-btn" data-filter="promo">Promo</button>
-      </div>
-
-      <div class="product-grid">
-        <div class="product-card" data-category="kerajinan">
-          <div class="product-badge">Best Seller</div>
-          <div class="product-image">
-            <img src="https://via.placeholder.com/300x200/2e8b57/ffffff?text=Batik+Modern" alt="Batik Modern Dress" />
-            <div class="product-overlay">
-              <button class="quick-view-btn">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="wishlist-btn">
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <span>(24 review)</span>
-            </div>
-            <h4>Dress Batik Modern Kawung</h4>
-            <p class="product-origin">Yogyakarta</p>
-            <div class="product-price">
-              <span class="current-price">Rp 450.000</span>
-              <span class="original-price">Rp 550.000</span>
-            </div>
-            <button class="add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="makanan">
-          <div class="product-badge new">New</div>
-          <div class="product-image">
-            <img src="https://via.placeholder.com/300x200/ff8c00/ffffff?text=Rendang+Instant" alt="Rendang Instant Premium" />
-            <div class="product-overlay">
-              <button class="quick-view-btn">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="wishlist-btn">
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="far fa-star"></i>
-              <span>(12 review)</span>
-            </div>
-            <h4>Rendang Instant Premium</h4>
-            <p class="product-origin">Sumatera Barat</p>
-            <div class="product-price">
-              <span class="current-price">Rp 85.000</span>
-            </div>
-            <button class="add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="fashion">
-          <div class="product-badge">Limited</div>
-          <div class="product-image">
-            <img src="https://via.placeholder.com/300x200/8b4513/ffffff?text=Kemeja+Tenun" alt="Kemeja Tenun Ikat" />
-            <div class="product-overlay">
-              <button class="quick-view-btn">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="wishlist-btn">
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <span>(18 review)</span>
-            </div>
-            <h4>Kemeja Tenun Ikat Flores</h4>
-            <p class="product-origin">Nusa Tenggara Timur</p>
-            <div class="product-price">
-              <span class="current-price">Rp 320.000</span>
-            </div>
-            <button class="add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="dekorasi">
-          <div class="product-image">
-            <img src="https://via.placeholder.com/300x200/654321/ffffff?text=Lampu+Anyaman" alt="Lampu Anyaman Bambu" />
-            <div class="product-overlay">
-              <button class="quick-view-btn">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="wishlist-btn">
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="far fa-star"></i>
-              <span>(8 review)</span>
-            </div>
-            <h4>Lampu Gantung Anyaman Bambu</h4>
-            <p class="product-origin">Jawa Barat</p>
-            <div class="product-price">
-              <span class="current-price">Rp 275.000</span>
-            </div>
-            <button class="add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="teknologi">
-          <div class="product-badge">Trending</div>
-          <div class="product-image">
-            <img src="https://via.placeholder.com/300x200/4169e1/ffffff?text=Case+Batik" alt="Phone Case Batik" />
-            <div class="product-overlay">
-              <button class="quick-view-btn">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="wishlist-btn">
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <span>(31 review)</span>
-            </div>
-            <h4>Phone Case Batik Mega Mendung</h4>
-            <p class="product-origin">Jawa Barat</p>
-            <div class="product-price">
-              <span class="current-price">Rp 125.000</span>
-            </div>
-            <button class="add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="minuman">
-          <div class="product-image">
-            <img src="https://via.placeholder.com/300x200/8b4513/ffffff?text=Kopi+Gayo" alt="Kopi Gayo Premium" />
-            <div class="product-overlay">
-              <button class="quick-view-btn">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="wishlist-btn">
-                <i class="fas fa-heart"></i>
-              </button>
-            </div>
-          </div>
-          <div class="product-info">
-            <div class="product-rating">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <span>(42 review)</span>
-            </div>
-            <h4>Kopi Gayo Premium Arabica</h4>
-            <p class="product-origin">Aceh</p>
-            <div class="product-price">
-              <span class="current-price">Rp 95.000</span>
-            </div>
-            <button class="add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Tambah ke Keranjang
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="load-more">
-        <button class="btn btn-outline">Muat Lebih Banyak</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="features">
-    <div class="container">
-      <div class="features-grid">
-        <div class="feature-item">
-          <i class="fas fa-truck"></i>
-          <h4>Pengiriman Gratis</h4>
-          <p>Gratis ongkir untuk pembelian minimal Rp 200.000</p>
-        </div>
-        <div class="feature-item">
-          <i class="fas fa-shield-alt"></i>
-          <h4>Garansi Kualitas</h4>
-          <p>Produk original langsung dari artisan terpercaya</p>
-        </div>
-        <div class="feature-item">
-          <i class="fas fa-headset"></i>
-          <h4>Customer Support</h4>
-          <p>Bantuan 24/7 untuk semua kebutuhan Anda</p>
-        </div>
-        <div class="feature-item">
-          <i class="fas fa-sync-alt"></i>
-          <h4>Easy Returns</h4>
-          <p>Kembalikan produk dalam 30 hari jika tidak puas</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="about" id="tentang">
-    <div class="container">
-      <div class="about-content">
-        <div class="about-text">
-          <h3>Tentang KreasiLokal.id</h3>
-          <p>Kami adalah platform e-commerce yang berdedikasi untuk melestarikan dan mengembangkan warisan budaya Indonesia melalui inovasi modern. Dengan menghubungkan artisan lokal dengan konsumen global, kami menciptakan jembatan antara tradisi dan modernitas.</p>
-          <div class="about-stats">
-            <div class="stat">
-              <strong>500+</strong>
-              <span>Produk Unik</span>
-            </div>
-            <div class="stat">
-              <strong>50+</strong>
-              <span>Artisan Partner</span>
-            </div>
-            <div class="stat">
-              <strong>10,000+</strong>
-              <span>Pelanggan Puas</span>
-            </div>
-          </div>
-        </div>
-        <div class="about-image">
-          <img src="https://via.placeholder.com/500x400/2e8b57/ffffff?text=Artisan+at+Work" alt="Artisan Indonesia" />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="newsletter">
-    <div class="container">
-      <div class="newsletter-content">
-        <h3>Dapatkan Update Terbaru</h3>
-        <p>Berlangganan newsletter untuk mendapatkan info produk terbaru, promo eksklusif, dan cerita menarik dari artisan Indonesia.</p>
-        <form class="newsletter-form">
-          <input type="email" placeholder="Masukkan email Anda..." required>
-          <button type="submit" class="btn btn-primary">Berlangganan</button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer" id="kontak">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h4>KreasiLokal.id</h4>
-          <p>Platform e-commerce yang menghubungkan tradisi dengan inovasi modern.</p>
-          <div class="social-links">
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-youtube"></i></a>
-          </div>
-        </div>
-        <div class="footer-section">
-          <h4>Kategori</h4>
-          <ul>
-            <li><a href="#">Kerajinan Tradisional</a></li>
-            <li><a href="#">Makanan Tradisional</a></li>
-            <li><a href="#">Fashion Heritage</a></li>
-            <li><a href="#">Dekorasi & Furniture</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4>Bantuan</h4>
-          <ul>
-            <li><a href="#">Cara Berbelanja</a></li>
-            <li><a href="#">Kebijakan Privasi</a></li>
-            <li><a href="#">Syarat & Ketentuan</a></li>
-            <li><a href="#">FAQ</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4>Kontak</h4>
-          <div class="contact-info">
-            <p><i class="fas fa-phone"></i> +62 812-3456-7890</p>
-            <p><i class="fas fa-envelope"></i> info@kreasilokal.id</p>
-            <p><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</p>
-          </div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2025 KreasiLokal.id. Hak cipta dilindungi undang-undang.</p>
-      </div>
-    </div>
-  </footer>
+    </section>
+  </main>
+  
+  <footer>
+      </footer>
 
   <script>
-    // Simple cart functionality
-    let cart = [];
-    const cartCount = document.querySelector('.cart-count');
-    const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+    // Countdown Timer Sederhana
+    const countdownElement = document.getElementById('countdown');
+    let timeInSeconds = (2 * 3600) + (28 * 60) + 45;
 
-    addToCartBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const productCard = this.closest('.product-card');
-        const productName = productCard.querySelector('h4').textContent;
-        const productPrice = productCard.querySelector('.current-price').textContent;
-        
-        cart.push({
-          name: productName,
-          price: productPrice
-        });
-        
-        cartCount.textContent = cart.length;
-        
-        // Animation feedback
-        this.style.background = '#28a745';
-        this.innerHTML = '<i class="fas fa-check"></i> Ditambahkan';
-        
-        setTimeout(() => {
-          this.style.background = '#ff8c00';
-          this.innerHTML = '<i class="fas fa-shopping-cart"></i> Tambah ke Keranjang';
-        }, 1500);
-      });
-    });
-
-    // Product filter functionality
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const productCards = document.querySelectorAll('.product-card');
-
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        // Remove active class from all buttons
-        filterBtns.forEach(b => b.classList.remove('active'));
-        // Add active class to clicked button
-        this.classList.add('active');
-        
-        const filter = this.dataset.filter;
-        
-        productCards.forEach(card => {
-          if (filter === 'all') {
-            card.style.display = 'block';
-          } else {
-            // Simple filter logic - you can expand this
-            card.style.display = 'block';
-          }
-        });
-      });
-    });
-
-    // Wishlist functionality
-    const wishlistBtns = document.querySelectorAll('.wishlist-btn');
-    
-    wishlistBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        this.classList.toggle('active');
-        if (this.classList.contains('active')) {
-          this.style.color = '#ff4757';
-        } else {
-          this.style.color = '#fff';
-        }
-      });
-    });
-
-    // Newsletter form
-    const newsletterForm = document.querySelector('.newsletter-form');
-    newsletterForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const email = this.querySelector('input[type="email"]').value;
-      alert(`Terima kasih! Email ${email} berhasil didaftarkan.`);
-      this.reset();
-    });
-
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
+    setInterval(() => {
+        timeInSeconds--;
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+        countdownElement.textContent = 
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 1000);
   </script>
+
 </body>
 </html>

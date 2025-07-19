@@ -5,19 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daftar Penjual - KreasiLokal.id</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
   <style>
-    /* Style dasar untuk form, mirip dengan pembeli */
-    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f4f7f6; }
+    /* Style dasar untuk form */
+    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f4f7f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     .form-container { background: #fff; padding: 2.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
     .form-header { text-align: center; margin-bottom: 1.5rem; }
     .form-group { margin-bottom: 1.25rem; }
     .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
     .input-group { position: relative; }
-    .input-group input { width: 100%; padding: 0.75rem; padding-left: 2.5rem; border: 1px solid #ccc; border-radius: 5px; }
+    .input-group input { width: 100%; padding: 0.75rem; padding-left: 2.5rem; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
     .input-group .fa { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #aaa; }
     .submit-btn { width: 100%; padding: 0.8rem; border: none; background-color: #ff8c00; color: white; font-size: 1rem; border-radius: 5px; cursor: pointer; }
     .form-footer { text-align: center; margin-top: 1.5rem; }
+
+    /* Style untuk pemisah dan tombol Google */
+    .divider { text-align: center; margin: 1.5rem 0; color: #888; position: relative; }
+    .divider::before, .divider::after { content: ''; display: block; width: 40%; height: 1px; background: #ddd; position: absolute; top: 50%; }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+    
+    .social-btn { width: 100%; padding: 0.8rem; border: 1px solid #ddd; background-color: #fff; color: #555; font-size: 1rem; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .google-btn .fa-google { color: #DB4437; }
   </style>
 </head>
 <body>
@@ -67,6 +75,13 @@
 
       <button type="submit" class="submit-btn">Daftarkan Toko Saya</button>
     </form>
+    
+    <!-- Tombol Daftar dengan Google -->
+    <div class="divider">atau</div>
+    <button type="button" class="social-btn google-btn">
+        <i class="fab fa-google"></i>
+        Daftar dengan Google
+    </button>
 
     <div class="form-footer">
       <p>Sudah punya akun penjual? <a href="loginpenjual.html">Masuk</a></p>
@@ -87,6 +102,12 @@ document.getElementById('registerpenjualform').addEventListener('submit', functi
   // Simulasi proses pendaftaran
   alert('Pendaftaran toko berhasil! Tim kami akan segera meninjau pendaftaran Anda.');
   window.location.href = 'loginpenjual.html';
+});
+
+// Simulasi klik tombol Google
+document.querySelector('.google-btn').addEventListener('click', function() {
+    alert('Fungsi daftar dengan Google akan segera diimplementasikan!');
+    // Di sini nantinya akan ada kode untuk memanggil Google Sign-In API
 });
 </script>
 

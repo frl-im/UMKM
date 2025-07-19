@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Produk - KreasiLokal.id</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f4; margin: 0; }
+        .container { width: 1200px; margin: 0 auto; padding: 0 15px; }
+        .card { background-color: #fff; padding: 2rem; border-radius: 8px; margin-bottom: 1rem; }
+        .product-detail-layout { display: grid; grid-template-columns: 40% 60%; gap: 2rem; }
+        
+        /* Galeri Gambar */
+        .image-gallery .main-image img { width: 100%; border-radius: 5px; border: 1px solid #eee; }
+        .thumbnail-images { display: flex; gap: 10px; margin-top: 10px; }
+        .thumbnail-images img { width: 80px; height: 80px; border-radius: 5px; cursor: pointer; border: 2px solid #eee; }
+        .thumbnail-images img.active { border-color: #2e8b57; }
+
+        /* Info Produk */
+        .product-info h1 { font-size: 2rem; margin: 0 0 10px 0; }
+        .product-rating { color: #ffc107; margin-bottom: 1rem; }
+        .product-price-section { background-color: #fafafa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; }
+        .product-price-section .price { font-size: 2.5rem; color: #ff8c00; font-weight: bold; }
+        
+        /* Opsi Varian & Kuantitas */
+        .options-section .option-group { margin-bottom: 1rem; }
+        .option-group label { font-weight: bold; display: block; margin-bottom: 8px; }
+        .option-group .option-buttons button { padding: 8px 15px; border: 1px solid #ccc; background: #fff; border-radius: 5px; cursor: pointer; margin-right: 8px; }
+        .option-group .option-buttons button.active { border-color: #2e8b57; background-color: #e9f5ee; }
+        .quantity-selector { display: flex; align-items: center; }
+        .quantity-selector button { width: 30px; height: 30px; border: 1px solid #ccc; background: #fff; }
+        .quantity-selector input { width: 50px; text-align: center; border: 1px solid #ccc; border-left: none; border-right: none; height: 30px; }
+        
+        /* Tombol Aksi */
+        .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .btn { padding: 1rem; font-size: 1rem; border-radius: 5px; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-add-to-cart { border: 2px solid #2e8b57; background: #e9f5ee; color: #2e8b57; flex-grow: 1; }
+        .btn-buy-now { border: none; background: #2e8b57; color: white; flex-grow: 1; }
+
+        /* Header yang sama dengan index.html */
+        .navbar { background-color: #ffffff; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+        .navbar .logo a { font-size: 1.8rem; font-weight: bold; color: #2e8b57; text-decoration: none; }
+        .nav-icons a { font-size: 1.5rem; color: #555; text-decoration: none; margin-left: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container">
+          <div class="logo">
+            <a href="index.html"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
+          </div>
+          <div class="nav-icons">
+            <a href="login.html" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+            <a href="keranjang.html" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
+          </div>
+        </div>
+    </header>
+
+    <main class="container" style="margin-top: 2rem;">
+        <div class="card product-detail-layout">
+            <!-- Kolom Kiri: Galeri Gambar -->
+            <div class="image-gallery">
+                <div class="main-image">
+                    <img id="mainProductImage" src="https://placehold.co/500x500/2e8b57/ffffff?text=Batik+Modern+1" alt="Gambar Produk Utama">
+                </div>
+                <div class="thumbnail-images">
+                    <img src="https://placehold.co/80x80/2e8b57/ffffff?text=Batik+1" class="active" onclick="changeImage(this.src)">
+                    <img src="https://placehold.co/80x80/2e8b57/ffffff?text=Batik+2" onclick="changeImage(this.src)">
+                    <img src="https://placehold.co/80x80/2e8b57/ffffff?text=Batik+3" onclick="changeImage(this.src)">
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Info Produk -->
+            <div class="product-info">
+                <h1>Dress Batik Modern Kawung</h1>
+                <div class="product-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <span> 4.5 | Terjual 100+</span>
+                </div>
+                <div class="product-price-section">
+                    <span class="price">Rp 450.000</span>
+                </div>
+
+                <div class="options-section">
+                    <div class="option-group">
+                        <label>Pilih Warna:</label>
+                        <div class="option-buttons" id="colorOptions">
+                            <button class="active">Merah</button>
+                            <button>Biru</button>
+                            <button>Hitam</button>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label>Pilih Ukuran:</label>
+                        <div class="option-buttons" id="sizeOptions">
+                            <button>S</button>
+                            <button class="active">M</button>
+                            <button>L</button>
+                            <button>XL</button>
+                        </div>
+                    </div>
+                    <div class="option-group">
+                        <label>Kuantitas:</label>
+                        <div class="quantity-selector">
+                            <button onclick="changeQuantity(-1)">-</button>
+                            <input type="text" id="quantityInput" value="1" readonly>
+                            <button onclick="changeQuantity(1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-add-to-cart" onclick="addToCart()"><i class="fas fa-cart-plus"></i> Tambah ke Keranjang</button>
+                    <a href="checkout.html" class="btn btn-buy-now">Beli Sekarang</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function changeImage(src) {
+            document.getElementById('mainProductImage').src = src.replace('80x80', '500x500');
+            const thumbnails = document.querySelectorAll('.thumbnail-images img');
+            thumbnails.forEach(thumb => thumb.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function changeQuantity(amount) {
+            const quantityInput = document.getElementById('quantityInput');
+            let currentValue = parseInt(quantityInput.value);
+            if (currentValue + amount > 0) {
+                quantityInput.value = currentValue + amount;
+            }
+        }
+        
+        // Fungsi untuk memilih opsi (warna/ukuran)
+        function setupOptionButtons(containerId) {
+            const container = document.getElementById(containerId);
+            container.addEventListener('click', function(e) {
+                if (e.target.tagName === 'BUTTON') {
+                    // Hapus kelas 'active' dari semua tombol di grup ini
+                    container.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    // Tambahkan kelas 'active' ke tombol yang diklik
+                    e.target.classList.add('active');
+                }
+            });
+        }
+
+        setupOptionButtons('colorOptions');
+        setupOptionButtons('sizeOptions');
+
+        function addToCart() {
+            // Logika untuk menambahkan ke keranjang (simulasi)
+            alert('Produk ditambahkan ke keranjang!');
+        }
+    </script>
+</body>
+</html>
