@@ -2,10 +2,147 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KreasiLokal.id - Tradisi Bertemu Inovasi</title>
-  <link rel="stylesheet" href="style.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Reset CSS & Font Dasar */
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    .container {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+
+    /* 1. Header Baru */
+    .navbar {
+      background-color: #ffffff;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar .logo a {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2e8b57;
+      text-decoration: none;
+    }
+    .main-search-bar {
+      flex-grow: 1;
+      margin: 0 2rem;
+      display: flex;
+    }
+    .main-search-bar input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #2e8b57;
+      border-right: none;
+      border-radius: 5px 0 0 5px;
+      font-size: 1rem;
+    }
+    .main-search-bar button {
+      padding: 0 1.2rem;
+      border: none;
+      background-color: #2e8b57;
+      color: white;
+      border-radius: 0 5px 5px 0;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .nav-icons a {
+      font-size: 1.5rem;
+      color: #555;
+      text-decoration: none;
+      margin-left: 1.5rem;
+    }
+    
+    /* 2. Banner & Ikon Navigasi */
+    .promo-banner-container { padding: 20px 0; background-color: white; }
+    .quick-nav-icons { padding: 20px 0; background-color: white; border-bottom: 10px solid #f4f4f4; }
+    .quick-nav-icons .container {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+    }
+    .quick-nav-item { text-decoration: none; color: #333; }
+    .quick-nav-item i { font-size: 2rem; color: #2e8b57; display: block; margin-bottom: 8px; }
+
+    /* 3. Flash Sale */
+    .flash-sale { padding: 20px 0; background-color: white; margin-bottom: 10px; }
+    .flash-sale-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .flash-sale-header h3 { font-size: 1.5rem; color: #ff8c00; margin: 0; }
+    .countdown-timer { margin-left: 1rem; font-weight: bold; }
+    .see-all { margin-left: auto; text-decoration: none; color: #007bff; }
+    
+    /* 4. Product Card yang Lebih Baik */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .product-card {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      overflow: hidden;
+      text-decoration: none;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .product-image { position: relative; }
+    .product-image img { width: 100%; display: block; }
+    .product-badge {
+      position: absolute;
+      top: 10px;
+      right: -1px;
+      background-color: rgba(255, 140, 0, 0.9);
+      color: white;
+      padding: 5px 8px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      border-radius: 3px 0 0 3px;
+    }
+    .product-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; }
+    .product-info h4 { font-size: 0.9rem; margin: 0 0 5px 0; height: 40px; }
+    .product-price { display: flex; align-items: center; gap: 8px; margin: 10px 0; }
+    .current-price { color: #ff8c00; font-weight: bold; font-size: 1.1rem; }
+    .original-price { text-decoration: line-through; color: #aaa; font-size: 0.8rem; }
+    .product-origin { font-size: 0.8rem; color: #777; }
+    .stock-bar {
+      height: 18px;
+      background-color: #ffc107;
+      border-radius: 9px;
+      text-align: center;
+      font-size: 0.7rem;
+      color: white;
+      font-weight: bold;
+      line-height: 18px;
+      margin-top: auto;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* Section Headers */
+    .section-header { padding: 20px 0 10px 0; font-size: 1.2rem; color: #555; border-bottom: 2px solid #2e8b57; margin-bottom: 20px; text-transform: uppercase; }
+  </style>
 </head>
 <body>
 
