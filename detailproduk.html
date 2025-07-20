@@ -119,6 +119,7 @@
                 <div class="action-buttons">
                     <button class="btn btn-add-to-cart" onclick="addToCart()"><i class="fas fa-cart-plus"></i> Tambah ke Keranjang</button>
                     <a href="checkout.html" class="btn btn-buy-now">Beli Sekarang</a>
+                    <button class="btn btn-add-to-cart" onclick="addToWishlist()">❤ Tambah ke Wishlist</button>
                 </div>
             </div>
         </div>
@@ -159,6 +160,17 @@
         function addToCart() {
             // Logika untuk menambahkan ke keranjang (simulasi)
             alert('Produk ditambahkan ke keranjang!');
+        }
+        function addToWishlist(){
+            const namaProduk = "Dress Batik Modern Kawung";
+            const gambar = document.getElementById("mainProductImage").src;
+            const harga = 450000;
+
+            const Wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+            Wishlist.push({nama: namaProduk, gambar: gambar, harga});
+            localStorage.setItem("wishlist", JSON.stringify(Wishlist));
+
+            alert("Produk ditambahkan ke wishlist!");
         }
     </script>
 </body>

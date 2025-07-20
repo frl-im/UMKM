@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Wishlist Saya</title>
+    <style>
+        body { font-family: sans-serif; background: #f9f9f9; padding: 2rem; }
+        h1 { color: #2e8b57; }
+        .wishlist-item { background: #fff; padding: 1rem; margin-bottom: 1rem; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        img { width: 100px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>❤ Wishlist Saya</h1>
+    <div id="wishlistContainer"></div>
+
+    <script>
+        const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+        const container = document.getElementById("wishlistContainer");
+
+        if (wishlist.length === 0) {
+            container.innerHTML = "<p>Belum ada produk di wishlist.</p>";
+        } else {
+            wishlist.forEach(item => {
+                container.innerHTML += `
+                    <div class="wishlist-item">
+                        <img src="${item.gambar}" alt="${item.nama}">
+                        <h3>${item.nama}</h3>
+                        <p>Harga: Rp ${item.harga.toLocaleString()}</p>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
