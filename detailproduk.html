@@ -6,123 +6,149 @@
     <title>Detail Produk - KreasiLokal.id</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f4f4f4; margin: 0; }
-        .container { width: 1200px; margin: 0 auto; padding: 0 15px; }
-        .card { background-color: #fff; padding: 2rem; border-radius: 8px; margin-bottom: 1rem; }
-        .product-detail-layout { display: grid; grid-template-columns: 40% 60%; gap: 2rem; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background-color: #f4f4f4; 
+            margin: 0; 
+            color: #333; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 1.5rem 15px; 
+        }
+        .card { 
+            background-color: #fff; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            margin-bottom: 1rem;
+        }
         
-        /* Galeri Gambar */
+        /* Header */
+        .navbar { background-color: #ffffff; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; padding: 0 15px; margin: 0 auto; }
+        .navbar .logo a { font-size: 1.8rem; font-weight: bold; color: #2e8b57; text-decoration: none; }
+        .navbar .nav-icons { display: flex; align-items: center; gap: 1.5rem; }
+        .navbar .nav-icons a { font-size: 1.5rem; color: #555; text-decoration: none; }
+
+
+        /* Product Overview */
+        .product-overview { display: grid; grid-template-columns: 450px 1fr; gap: 2rem; }
         .image-gallery .main-image img { width: 100%; border-radius: 5px; border: 1px solid #eee; }
         .thumbnail-images { display: flex; gap: 10px; margin-top: 10px; }
-        .thumbnail-images img { width: 80px; height: 80px; border-radius: 5px; cursor: pointer; border: 2px solid #eee; }
+        .thumbnail-images img { width: 80px; height: 80px; border-radius: 5px; cursor: pointer; border: 2px solid #eee; object-fit: cover; }
         .thumbnail-images img.active { border-color: #2e8b57; }
 
-        /* Info Produk */
-        .product-info h1 { font-size: 2rem; margin: 0 0 10px 0; }
-        .product-rating { color: #ffc107; margin-bottom: 1rem; }
+        .product-info h1 { font-size: 1.5rem; margin: 0 0 10px 0; }
+        .product-stats { display: flex; align-items: center; gap: 1.5rem; color: #555; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
+        .product-stats .rating { color: #ffc107; }
         .product-price-section { background-color: #fafafa; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; }
-        .product-price-section .price { font-size: 2.5rem; color: #ff8c00; font-weight: bold; }
+        .product-price-section .current-price { font-size: 2rem; color: #2e8b57; font-weight: bold; }
+        .product-price-section .original-price { text-decoration: line-through; color: #aaa; margin-left: 10px; }
         
-        /* Opsi Varian & Kuantitas */
-        .options-section .option-group { margin-bottom: 1rem; }
-        .option-group label { font-weight: bold; display: block; margin-bottom: 8px; }
-        .option-group .option-buttons button { padding: 8px 15px; border: 1px solid #ccc; background: #fff; border-radius: 5px; cursor: pointer; margin-right: 8px; }
-        .option-group .option-buttons button.active { border-color: #2e8b57; background-color: #e9f5ee; }
-        .quantity-selector { display: flex; align-items: center; }
-        .quantity-selector button { width: 30px; height: 30px; border: 1px solid #ccc; background: #fff; }
-        .quantity-selector input { width: 50px; text-align: center; border: 1px solid #ccc; border-left: none; border-right: none; height: 30px; }
+        .info-list .info-item { display: flex; align-items: center; gap: 10px; margin-bottom: 0.8rem; }
+        .info-list .info-item i { color: #2e8b57; }
         
-        /* Tombol Aksi */
-        .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; }
-        .btn { padding: 1rem; font-size: 1rem; border-radius: 5px; cursor: pointer; text-align: center; text-decoration: none; }
-        .btn-add-to-cart { border: 2px solid #2e8b57; background: #e9f5ee; color: #2e8b57; flex-grow: 1; }
-        .btn-buy-now { border: none; background: #2e8b57; color: white; flex-grow: 1; }
+        .variant-group { margin-top: 1.5rem; }
+        .variant-group label { font-weight: 600; display: block; margin-bottom: 8px; }
+        .variant-buttons button { padding: 8px 15px; border: 1px solid #ccc; background: #fff; border-radius: 5px; cursor: pointer; margin-right: 8px; }
+        .variant-buttons button.active { border-color: #2e8b57; background-color: #e9f5ee; }
 
-        /* Header yang sama dengan index.html */
-        .navbar { background-color: #ffffff; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
-        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
-        .navbar .logo a { font-size: 1.8rem; font-weight: bold; color: #2e8b57; text-decoration: none; }
-        .nav-icons a { font-size: 1.5rem; color: #555; text-decoration: none; margin-left: 1.5rem; }
+        /* Seller Info */
+        .seller-info { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid #eee; border-radius: 8px; }
+        .seller-info img { width: 60px; height: 60px; border-radius: 50%; }
+        .seller-info .seller-details { flex-grow: 1; }
+        .seller-info .seller-details strong { display: block; font-size: 1.1rem; }
+        .btn-outline { padding: 0.6rem 1rem; border: 1px solid #2e8b57; color: #2e8b57; background: transparent; border-radius: 5px; cursor: pointer; font-weight: 600; }
+
+        /* Reviews */
+        .review-summary { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .review-card { border-top: 1px solid #eee; padding-top: 1.5rem; margin-top: 1.5rem; }
+        .review-card .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem; }
+        .review-card .user-info img { width: 40px; height: 40px; border-radius: 50%; }
+        .review-card .review-images { display: flex; gap: 10px; margin-top: 1rem; }
+        .review-card .review-images img { width: 70px; height: 70px; border-radius: 5px; object-fit: cover; }
+
+        /* Horizontal Scroll Sections */
+        .horizontal-scroll-container { display: flex; overflow-x: auto; gap: 1rem; padding-bottom: 1rem; }
+        .horizontal-scroll-container::-webkit-scrollbar { height: 5px; }
+        .horizontal-scroll-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 5px; }
+        .product-card-small { flex: 0 0 180px; border: 1px solid #eee; border-radius: 5px; overflow: hidden; }
+        .product-card-small img { width: 100%; height: 180px; object-fit: cover; }
+        .product-card-small .info { padding: 10px; }
+        .product-card-small .info h4 { font-size: 0.9rem; margin: 0 0 5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-card-small .info p { font-size: 1rem; font-weight: bold; color: #2e8b57; margin: 0; }
+
+        /* Specs & Description */
+        .product-specs table { width: 100%; border-collapse: collapse; }
+        .product-specs td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        .product-specs td:first-child { width: 200px; color: #777; }
+
+        /* Bottom Action Bar */
+        .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; z-index: 1000; }
+        .bottom-action-bar .action-group { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.5rem 1rem; border-right: 1px solid #eee; }
+        .bottom-action-bar .main-actions { flex-grow: 1; display: flex; }
+        .bottom-action-bar .btn-action { flex: 1; padding: 1rem; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .btn-add-to-cart { background-color: #e9f5ee; color: #2e8b57; }
+        .btn-buy-now { background-color: #2e8b57; color: white; }
     </style>
 </head>
 <body>
-
     <header class="navbar">
         <div class="container">
           <div class="logo">
             <a href="index.html"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
           </div>
           <div class="nav-icons">
-            <a href="login.html" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+            <a href="javascript:history.back()" title="Kembali"><i class="fas fa-arrow-left"></i></a>
+            <a href="index.html" title="Beranda"><i class="fas fa-home"></i></a>
             <a href="keranjang.html" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
           </div>
         </div>
     </header>
 
-    <main class="container" style="margin-top: 2rem;">
-        <div class="card product-detail-layout">
-            <!-- Kolom Kiri: Galeri Gambar -->
+    <div class="container" id="product-detail-container">
+        <!-- Bagian Atas: Gambar & Info Utama -->
+        <div class="card product-overview">
             <div class="image-gallery">
                 <div class="main-image">
-                    <img id="mainProductImage" src="https://placehold.co/500x500/2e8b57/ffffff?text=Batik+Modern+1" alt="Gambar Produk Utama">
+                    <img id="mainProductImage" src="https://placehold.co/450x450/ccc/ffffff?text=Loading..." alt="Gambar Produk Utama">
                 </div>
-                <div class="thumbnail-images">
-                    <img src="https://placehold.co/80x80/2e8b57/ffffff?text=Batik+1" class="active" onclick="changeImage(this.src)">
-                    <img src="https://placehold.co/80x80/2e8b57/ffffff?text=Batik+2" onclick="changeImage(this.src)">
-                    <img src="https://placehold.co/80x80/2e8b57/ffffff?text=Batik+3" onclick="changeImage(this.src)">
+                <div class="thumbnail-images" id="thumbnail-container">
+                    <!-- Thumbnails will be generated by JavaScript -->
                 </div>
             </div>
-
-            <!-- Kolom Kanan: Info Produk -->
             <div class="product-info">
-                <h1>Dress Batik Modern Kawung</h1>
-                <div class="product-rating">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
-                    <span> 4.5 | Terjual 100+</span>
+                <h1 id="product-name">Memuat nama produk...</h1>
+                <div class="product-stats">
+                    <span class="rating">
+                        <i class="fas fa-star"></i> <span id="product-rating">...</span>
+                    </span>
+                    <span>|</span>
+                    <span>Penilaian: <span id="product-reviews">...</span></span>
+                    <span>|</span>
+                    <span>Terjual: <span id="product-sold">...</span></span>
                 </div>
                 <div class="product-price-section">
-                    <span class="price">Rp 450.000</span>
+                    <span class="current-price" id="product-price">Rp ...</span>
+                    <span class="original-price" id="product-original-price"></span>
                 </div>
-
-                <div class="options-section">
-                    <div class="option-group">
-                        <label>Pilih Warna:</label>
-                        <div class="option-buttons" id="colorOptions">
-                            <button class="active">Merah</button>
-                            <button>Biru</button>
-                            <button>Hitam</button>
-                        </div>
-                    </div>
-                    <div class="option-group">
-                        <label>Pilih Ukuran:</label>
-                        <div class="option-buttons" id="sizeOptions">
-                            <button>S</button>
-                            <button class="active">M</button>
-                            <button>L</button>
-                            <button>XL</button>
-                        </div>
-                    </div>
-                    <div class="option-group">
-                        <label>Kuantitas:</label>
-                        <div class="quantity-selector">
-                            <button onclick="changeQuantity(-1)">-</button>
-                            <input type="text" id="quantityInput" value="1" readonly>
-                            <button onclick="changeQuantity(1)">+</button>
-                        </div>
-                    </div>
+                <div class="info-list">
+                    <div class="info-item"><i class="fas fa-check-circle"></i> <span>Garansi Tiba Tepat Waktu</span></div>
+                    <div class="info-item"><i class="fas fa-undo"></i> <span>15 Hari Pengembalian</span></div>
+                    <div class="info-item"><i class="fas fa-gem"></i> <span>100% Produk Lokal Asli</span></div>
                 </div>
-
-                <div class="action-buttons">
-                    <button class="btn btn-add-to-cart" onclick="addToCart()"><i class="fas fa-cart-plus"></i> Tambah ke Keranjang</button>
-                    <a href="checkout.html" class="btn btn-buy-now">Beli Sekarang</a>
-                    <button class="btn btn-add-to-cart" onclick="addToWishlist()">❤ Tambah ke Wishlist</button>
+                <div class="variant-group">
+                    <label>Pilih Warna:</label>
+                    <div class="variant-buttons">
+                        <button class="active">Merah Marun</button>
+                        <button>Biru Dongker</button>
+                        <button>Hijau Botol</button>
+                    </div>
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
         <!-- MULAI: Ulasan Pembeli -->
         <section id="ulasan" style="margin-top: 3rem;">
           <h2 style="font-size: 1.5rem; color: #2e8b57;">Ulasan Pembeli</h2>
@@ -153,36 +179,214 @@
         </section>
         <!-- AKHIR: Ulasan Pembeli -->
     </main>
+=======
+
+        <!-- Info Toko -->
+        <div class="card seller-info">
+            <img src="https://placehold.co/100x100/2e8b57/ffffff?text=GJ" alt="Logo Toko">
+            <div class="seller-details">
+                <strong id="seller-name">Galeri Jawa</strong>
+                <span>Aktif 5 menit lalu</span>
+            </div>
+            <button class="btn-outline">Kunjungi Toko</button>
+        </div>
+        
+        <!-- Spesifikasi & Deskripsi -->
+        <div class="card">
+            <h3>Spesifikasi Produk</h3>
+            <div class="product-specs">
+                <table>
+                    <tr><td>Kategori</td><td id="spec-category">...</td></tr>
+                    <tr><td>Stok</td><td id="spec-stock">...</td></tr>
+                    <tr><td>Asal Produk</td><td id="spec-origin">Lokal</td></tr>
+                    <tr><td>Dikirim dari</td><td id="spec-location">...</td></tr>
+                </table>
+            </div>
+            <br>
+            <h3>Deskripsi Produk</h3>
+            <p id="product-description">Memuat deskripsi...</p>
+        </div>
+        
+        <!-- BAGIAN BARU DITAMBAHKAN DI SINI -->
+        <div class="card">
+            <h3>Penilaian Produk</h3>
+            <div class="review-summary">
+                <span class="rating" style="font-size: 1.5rem;"><i class="fas fa-star"></i> 4.9 dari 5</span>
+            </div>
+            <div class="review-card">
+                <div class="user-info">
+                    <img src="https://placehold.co/40x40/777/ffffff?text=S" alt="User Avatar">
+                    <strong>Sari Dewi</strong>
+                </div>
+                <div class="rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p>Kualitasnya bagus banget, warnanya cerah dan kainnya adem. Pengiriman juga cepat. Recommended!</p>
+                <div class="review-images">
+                    <img src="https://placehold.co/70x70/8B4513/ffffff?text=Review+1" alt="Review Image">
+                    <img src="https://placehold.co/70x70/8B4513/ffffff?text=Review+2" alt="Review Image">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Produk Lain Dari Toko Ini</h3>
+            <div class="horizontal-scroll-container">
+                <div class="product-card-small">
+                    <img src="https://placehold.co/180x180/8B4513/ffffff?text=Batik+Mega+Mendung" alt="Produk Lain">
+                    <div class="info"><h4>Batik Mega Mendung</h4><p>Rp 650.000</p></div>
+                </div>
+                <div class="product-card-small">
+                    <img src="https://placehold.co/180x180/8B4513/ffffff?text=Kain+Tenun+Sumba" alt="Produk Lain">
+                    <div class="info"><h4>Kain Tenun Sumba</h4><p>Rp 1.500.000</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Kamu Mungkin Juga Suka</h3>
+            <div class="horizontal-scroll-container">
+                <div class="product-card-small">
+                    <img src="https://placehold.co/180x180/2e8b57/ffffff?text=Batik+Parang" alt="Rekomendasi Produk">
+                    <div class="info"><h4>Kain Batik Parang</h4><p>Rp 750.000</p></div>
+                </div>
+                <div class="product-card-small">
+                    <img src="https://placehold.co/180x180/2e8b57/ffffff?text=Batik+Kawung" alt="Rekomendasi Produk">
+                    <div class="info"><h4>Kemeja Batik Kawung</h4><p>Rp 450.000</p></div>
+                </div>
+            </div>
+        </div>
+        <!-- AKHIR DARI BAGIAN BARU -->
+
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div style="height: 80px;"></div> <!-- Spacer for bottom bar -->
+    <div class="bottom-action-bar">
+        <div class="action-group">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </div>
+        <div class="main-actions">
+            <button class="btn-action btn-add-to-cart"><i class="fas fa-cart-plus"></i> Masukkan Keranjang</button>
+            <button class="btn-action btn-buy-now">Beli Sekarang</button>
+        </div>
+    </div>
+>>>>>>> aa2473525c5efde6173aeb97f450e979e1dfa174
 
     <script>
+        // --- DATABASE MINI (MOCK DATABASE) ---
+        const productsDB = {
+            '1': {
+                name: 'Dress Batik Modern Kawung',
+                price: 'Rp 450.000',
+                originalPrice: 'Rp 550.000',
+                rating: '4.8',
+                reviews: '120',
+                sold: '250+',
+                image: 'https://placehold.co/450x450/2e8b57/ffffff?text=Batik+Modern',
+                thumbnails: [
+                    'https://placehold.co/80x80/2e8b57/ffffff?text=Batik+1',
+                    'https://placehold.co/80x80/2e8b57/ffffff?text=Batik+2',
+                ],
+                seller: 'Batik Elegan',
+                category: 'Fashion Wanita',
+                stock: 50,
+                location: 'KOTA YOGYAKARTA',
+                description: 'Dress batik modern dengan motif Kawung yang elegan, cocok untuk acara formal maupun kasual. Terbuat dari bahan katun primisima yang nyaman dan tidak panas.'
+            },
+            '2': {
+                name: 'Rendang Instant Premium',
+                price: 'Rp 85.000',
+                originalPrice: '',
+                rating: '4.9',
+                reviews: '300',
+                sold: '1k+',
+                image: 'https://placehold.co/450x450/ff8c00/ffffff?text=Rendang+Instant',
+                thumbnails: [
+                    'https://placehold.co/80x80/ff8c00/ffffff?text=Rendang+1',
+                    'https://placehold.co/80x80/ff8c00/ffffff?text=Rendang+2',
+                    'https://placehold.co/80x80/ff8c00/ffffff?text=Rendang+3',
+                ],
+                seller: 'Dapur Nusantara',
+                category: 'Makanan & Minuman',
+                stock: 150,
+                location: 'KOTA PADANG',
+                description: 'Rendang daging sapi premium siap saji. Dibuat dengan resep asli Minang dan bumbu-bumbu pilihan. Tanpa bahan pengawet, praktis untuk dinikmati kapan saja.'
+            },
+            '3': {
+                name: 'Kain Batik Tulis Lasem - Motif Sekar Jagad',
+                price: 'Rp 850.000',
+                originalPrice: 'Rp 1.200.000',
+                rating: '4.9',
+                reviews: '150',
+                sold: '300+',
+                image: 'https://placehold.co/450x450/8B4513/ffffff?text=Batik+Tulis',
+                thumbnails: [
+                    'https://placehold.co/80x80/8B4513/ffffff?text=Batik+1',
+                    'https://placehold.co/80x80/8B4513/ffffff?text=Batik+2',
+                    'https://placehold.co/80x80/8B4513/ffffff?text=Batik+3'
+                ],
+                seller: 'Galeri Jawa',
+                category: 'Batik & Tenun',
+                stock: 15,
+                location: 'KAB. REMBANG',
+                description: 'Kain Batik Tulis Lasem Asli dengan motif Sekar Jagad yang melambangkan keindahan dan keragaman. Dibuat secara tradisional oleh pengrajin berpengalaman di Rembang, Jawa Tengah.'
+            }
+        };
+
+        // --- FUNGSI UNTUK MENGGANTI GAMBAR ---
         function changeImage(src) {
-            document.getElementById('mainProductImage').src = src.replace('80x80', '500x500');
+            document.getElementById('mainProductImage').src = src.replace('80x80', '450x450');
             const thumbnails = document.querySelectorAll('.thumbnail-images img');
             thumbnails.forEach(thumb => thumb.classList.remove('active'));
-            event.target.classList.add('active');
+            // Cari thumbnail yang sesuai untuk ditandai sebagai aktif
+            const matchingThumb = Array.from(thumbnails).find(t => t.src === src);
+            if(matchingThumb) matchingThumb.classList.add('active');
         }
 
-        function changeQuantity(amount) {
-            const quantityInput = document.getElementById('quantityInput');
-            let currentValue = parseInt(quantityInput.value);
-            if (currentValue + amount > 0) {
-                quantityInput.value = currentValue + amount;
+        // --- LOGIKA UTAMA SAAT HALAMAN DIMUAT ---
+        window.onload = function() {
+            // 1. Ambil ID produk dari URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            // 2. Cari data produk di database mini
+            const productData = productsDB[productId];
+
+            // 3. Jika produk ditemukan, update halaman. Jika tidak, tampilkan pesan error.
+            if (productData) {
+                document.getElementById('product-name').textContent = productData.name;
+                document.getElementById('product-rating').textContent = productData.rating;
+                document.getElementById('product-reviews').textContent = productData.reviews;
+                document.getElementById('product-sold').textContent = productData.sold;
+                document.getElementById('product-price').textContent = productData.price;
+                document.getElementById('product-original-price').textContent = productData.originalPrice;
+                document.getElementById('mainProductImage').src = productData.image;
+                document.getElementById('seller-name').textContent = productData.seller;
+                document.getElementById('spec-category').textContent = productData.category;
+                document.getElementById('spec-stock').textContent = productData.stock;
+                document.getElementById('spec-location').textContent = productData.location;
+                document.getElementById('product-description').textContent = productData.description;
+                document.title = productData.name + " - KreasiLokal.id";
+
+                // Generate thumbnail images
+                const thumbnailContainer = document.getElementById('thumbnail-container');
+                thumbnailContainer.innerHTML = ''; // Kosongkan dulu
+                productData.thumbnails.forEach((thumbSrc, index) => {
+                    const img = document.createElement('img');
+                    img.src = thumbSrc;
+                    img.onclick = function() { changeImage(thumbSrc); };
+                    if (index === 0) {
+                        img.className = 'active';
+                    }
+                    thumbnailContainer.appendChild(img);
+                });
+
+            } else {
+                // Tampilkan pesan jika produk tidak ditemukan
+                document.getElementById('product-detail-container').innerHTML = '<h1>404 - Produk Tidak Ditemukan</h1><p>Maaf, produk yang Anda cari tidak ada. Silakan kembali ke <a href="index.html">halaman utama</a>.</p>';
             }
-        }
-        
-        // Fungsi untuk memilih opsi (warna/ukuran)
-        function setupOptionButtons(containerId) {
-            const container = document.getElementById(containerId);
-            container.addEventListener('click', function(e) {
-                if (e.target.tagName === 'BUTTON') {
-                    // Hapus kelas 'active' dari semua tombol di grup ini
-                    container.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                    // Tambahkan kelas 'active' ke tombol yang diklik
-                    e.target.classList.add('active');
-                }
-            });
-        }
 
+<<<<<<< HEAD
         setupOptionButtons('colorOptions');
         setupOptionButtons('sizeOptions');
 
@@ -246,6 +450,9 @@ tampilkanUlasan();
 
 
 
+=======
+        };
+>>>>>>> aa2473525c5efde6173aeb97f450e979e1dfa174
     </script>
 </body>
 </html>

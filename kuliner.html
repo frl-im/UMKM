@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori Kuliner - KreasiLokal.id</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background-color: #f4f4f4; 
+            margin: 0; 
+            color: #333; 
+        }
+        .container { 
+            width: 1200px; 
+            margin: 0 auto; 
+            padding: 0 15px; 
+        }
+        .card { 
+            background-color: #fff; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Header */
+        .navbar { background-color: #ffffff; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
+        .navbar .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-left { display: flex; align-items: center; }
+        .nav-left .back-btn { font-size: 1.5rem; color: #333; text-decoration: none; margin-right: 1.5rem; }
+        .nav-left .page-title { font-size: 1.2rem; font-weight: 600; }
+        .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-right a { font-size: 1.5rem; color: #555; text-decoration: none; }
+
+        /* Filter Kategori */
+        .category-filters {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+            overflow-x: auto;
+        }
+        .filter-btn {
+            padding: 0.7rem 1.2rem;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background-color: #2e8b57;
+            color: white;
+            border-color: #2e8b57;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        .product-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .product-image img { 
+            width: 100%; 
+            height: 220px;
+            object-fit: cover;
+            display: block; 
+        }
+        .product-info { 
+            padding: 1rem; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .product-info h4 { 
+            font-size: 1rem; 
+            margin: 0 0 0.5rem 0; 
+            height: 40px; 
+        }
+        .product-info .origin {
+            font-size: 0.8rem;
+            color: #777;
+            margin-bottom: 1rem;
+        }
+        .product-price { 
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff8c00;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <div class="nav-left">
+                <a href="javascript:history.back()" class="back-btn" title="Kembali"><i class="fas fa-arrow-left"></i></a>
+                <span class="page-title">Kuliner Nusantara</span>
+            </div>
+            <div class="nav-right">
+                <a href="index.html" title="Beranda"><i class="fas fa-home"></i></a>
+                <a href="chat.html" title="Chat"><i class="fas fa-comments"></i></a>
+                <a href="keranjang.html" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="category-filters">
+            <button class="filter-btn active">Semua</button>
+            <button class="filter-btn">Makanan Ringan</button>
+            <button class="filter-btn">Minuman</button>
+            <button class="filter-btn">Bumbu & Sambal</button>
+            <button class="filter-btn">Kue Tradisional</button>
+        </div>
+
+        <section class="card">
+            <div class="product-grid">
+                <!-- Contoh Produk 1 -->
+                <a href="produk-detail.html?id=2" class="product-card">
+                    <div class="product-image">
+                        <img src="https://placehold.co/300x300/ff8c00/ffffff?text=Rendang" alt="Rendang">
+                    </div>
+                    <div class="product-info">
+                        <h4>Rendang Daging Sapi Premium</h4>
+                        <p class="origin">Asal: Padang</p>
+                        <p class="product-price">Rp 85.000</p>
+                    </div>
+                </a>
+                <!-- Contoh Produk 2 -->
+                <a href="produk-detail.html?id=202" class="product-card">
+                    <div class="product-image">
+                        <img src="https://placehold.co/300x300/c0392b/ffffff?text=Sambal" alt="Sambal">
+                    </div>
+                    <div class="product-info">
+                        <h4>Sambal Roa Khas Manado</h4>
+                        <p class="origin">Asal: Manado</p>
+                        <p class="product-price">Rp 45.000</p>
+                    </div>
+                </a>
+                <!-- Tambahkan produk kuliner lainnya di sini -->
+            </div>
+        </section>
+    </main>
+</body>
+</html>

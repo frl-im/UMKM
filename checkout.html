@@ -34,14 +34,18 @@
         /* Header */
         .navbar { background-color: #ffffff; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
         .navbar .container { display: flex; align-items: center; }
-        .navbar .logo a { font-size: 1.8rem; font-weight: bold; color: #2e8b57; text-decoration: none; }
+        .navbar .nav-left a { font-size: 1.5rem; color: #333; text-decoration: none; margin-right: 1rem; }
+        .navbar .nav-center { font-size: 1.2rem; font-weight: 600; }
     </style>
 </head>
 <body>
     <header class="navbar">
         <div class="container">
-          <div class="logo">
-            <a href="index.html"><i class="fas fa-leaf"></i> Checkout</a>
+          <div class="nav-left">
+            <a href="javascript:history.back()" title="Kembali"><i class="fas fa-arrow-left"></i></a>
+          </div>
+          <div class="nav-center">
+            <span>Checkout</span>
           </div>
         </div>
     </header>
@@ -139,30 +143,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- State Management ---
-            const state = {
-                subtotal: 708500, // Nilai subtotal awal
-                shippingCost: 15000, // Nilai ongkir awal
-                discount: 0,
-            };
-
-            // --- Element Selectors ---
+            const state = { subtotal: 708500, shippingCost: 15000, discount: 0 };
             const shippingOptionsContainer = document.querySelector('.shipping-options');
             const paymentOptionsContainer = document.querySelector('.payment-options');
             const applyVoucherBtn = document.getElementById('apply-voucher-btn');
             const voucherCodeInput = document.getElementById('voucher-code');
-
-            // --- UI Update Function ---
-            function formatCurrency(value) {
-                return 'Rp ' + value.toLocaleString('id-ID');
-            }
-
+            function formatCurrency(value) { return 'Rp ' + value.toLocaleString('id-ID'); }
             function updateSummary() {
                 const total = state.subtotal + state.shippingCost - state.discount;
-
                 document.getElementById('summary-subtotal').textContent = formatCurrency(state.subtotal);
                 document.getElementById('summary-shipping').textContent = formatCurrency(state.shippingCost);
-                
                 const discountRow = document.getElementById('summary-discount-row');
                 if (state.discount > 0) {
                     document.getElementById('summary-discount').textContent = '- ' + formatCurrency(state.discount);
@@ -170,33 +160,25 @@
                 } else {
                     discountRow.style.display = 'none';
                 }
-
                 document.getElementById('summary-total').textContent = formatCurrency(total);
             }
-
-            // --- Event Listeners ---
             function setupOptionSelector(container) {
                 if (!container) return;
                 container.addEventListener('click', function(event) {
                     const clickedOption = event.target.closest('.option-box');
                     if (!clickedOption) return;
-
                     container.querySelectorAll('.option-box').forEach(opt => opt.classList.remove('selected'));
                     clickedOption.classList.add('selected');
-
-                    // Jika ini adalah kontainer pengiriman, update biaya
                     if (container.classList.contains('shipping-options')) {
                         state.shippingCost = parseInt(clickedOption.dataset.cost) || 0;
                         updateSummary();
                     }
                 });
             }
-
             applyVoucherBtn.addEventListener('click', function() {
                 const code = voucherCodeInput.value.trim().toUpperCase();
-                // Simulasi validasi voucher
                 if (code === 'LOKALDISKON') {
-                    state.discount = 50000; // Contoh diskon 50rb
+                    state.discount = 50000;
                     alert('Voucher berhasil digunakan!');
                 } else {
                     state.discount = 0;
@@ -204,11 +186,9 @@
                 }
                 updateSummary();
             });
-
-            // --- Initialization ---
             setupOptionSelector(shippingOptionsContainer);
             setupOptionSelector(paymentOptionsContainer);
-            updateSummary(); // Panggil sekali saat halaman dimuat untuk memastikan nilai awal benar
+            updateSummary();
         });
     </script>
 </body>
