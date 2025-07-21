@@ -123,6 +123,35 @@
                 </div>
             </div>
         </div>
+        <!-- MULAI: Ulasan Pembeli -->
+        <section id="ulasan" style="margin-top: 3rem;">
+          <h2 style="font-size: 1.5rem; color: #2e8b57;">Ulasan Pembeli</h2>
+
+            <form id="formUlasan">
+
+               <label for="nama">Nama:</label><br>
+               <input type="text" id="nama" required><br><br>
+
+               <label for="rating">Rating:</label><br>
+               <select id="rating" required>
+                    <option value="">Pilih rating</option>
+                    <option value="1">⭐</option>
+                    <option value="2">⭐⭐</option>
+                    <option value="3">⭐⭐⭐</option>
+                    <option value="4">⭐⭐⭐⭐</option>
+                    <option value="5">⭐⭐⭐⭐⭐</option>
+                </select><br><br>
+
+                <label for="komentar">Komentar:</label><br>
+                <textarea id="komentar" rows="4" required></textarea><br><br>
+
+                <button type="submit">Kirim Ulasan</button>
+            </form>
+
+            <hr>
+            <div id="daftarUlasan"></div>
+        </section>
+        <!-- AKHIR: Ulasan Pembeli -->
     </main>
 
     <script>
@@ -172,6 +201,51 @@
 
             alert("Produk ditambahkan ke wishlist!");
         }
+
+        document.getElementById("formUlasan").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const nama = document.getElementById("nama").value;
+    const rating = document.getElementById("rating").value;
+    const komentar = document.getElementById("komentar").value;
+
+    const ulasan = {
+        nama,
+        rating,
+        komentar,
+        tanggal: new Date().toLocaleDateString("id-ID")
+    };
+
+    let daftar = JSON.parse(localStorage.getItem("ulasan")) || [];
+    daftar.push(ulasan);
+    localStorage.setItem("ulasan", JSON.stringify(daftar));
+
+    alert("Terima kasih atas ulasannya!");
+
+    document.getElementById("formUlasan").reset();
+    tampilkanUlasan();
+});
+
+function tampilkanUlasan() {
+    const daftarUlasan = JSON.parse(localStorage.getItem("ulasan")) || [];
+    const container = document.getElementById("daftarUlasan");
+    container.innerHTML = "";
+
+    daftarUlasan.forEach(u => {
+        container.innerHTML += `
+            <div style="margin-bottom:1rem;">
+                <strong>${u.nama}</strong> (${u.rating}⭐) - ${u.tanggal}<br>
+                <em>${u.komentar}</em>
+            </div>
+        `;
+    });
+}
+
+// Tampilkan saat halaman pertama kali dibuka
+tampilkanUlasan();
+
+
+
     </script>
 </body>
 </html>
