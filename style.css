@@ -175,3 +175,56 @@ body {
     margin: 0.5rem 0;
   }
 }
+
+#form-ulasan {
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  max-width: 500px;
+  margin-bottom: 2rem;
+}
+
+#form-ulasan input,
+#form-ulasan select,
+#form-ulasan textarea {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+#form-ulasan button {
+  padding: 0.75rem 1.5rem;
+  background-color: #00a86b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+#form-ulasan button:hover {
+  background-color: #007a50;
+}
+
+#daftar-ulasan {
+  max-width: 500px;
+}
+
+#daftar-ulasan div {
+  background: #fff;
+  border: 1px solid #eee;
+  border-left: 5px solid #00a86b;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+}
+
+#daftar-ulasan strong {
+  font-size: 1.1rem;
+  color: #333;
+}
