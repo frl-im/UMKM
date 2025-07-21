@@ -355,5 +355,32 @@
 
         };
     </script>
+    <script>
+document.querySelector('.btn-add-to-cart').addEventListener('click', function() {
+    // Ambil ID produk dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+        alert('ID Produk tidak valid!');
+        return;
+    }
+
+    // Kirim data ke backend menggunakan fetch
+    const formData = new FormData();
+    formData.append('action', 'add_to_cart');
+    formData.append('product_id', productId);
+
+    fetch('fungsi.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message); // Tampilkan pesan dari server
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
 </body>
 </html>
