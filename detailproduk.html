@@ -148,7 +148,7 @@
                 </div>
             </div>
         </div>
-<<<<<<< HEAD
+        
         <!-- MULAI: Ulasan Pembeli -->
         <section id="ulasan" style="margin-top: 3rem;">
           <h2 style="font-size: 1.5rem; color: #2e8b57;">Ulasan Pembeli</h2>
@@ -179,7 +179,6 @@
         </section>
         <!-- AKHIR: Ulasan Pembeli -->
     </main>
-=======
 
         <!-- Info Toko -->
         <div class="card seller-info">
@@ -386,73 +385,7 @@
                 document.getElementById('product-detail-container').innerHTML = '<h1>404 - Produk Tidak Ditemukan</h1><p>Maaf, produk yang Anda cari tidak ada. Silakan kembali ke <a href="index.html">halaman utama</a>.</p>';
             }
 
-<<<<<<< HEAD
-        setupOptionButtons('colorOptions');
-        setupOptionButtons('sizeOptions');
-
-        function addToCart() {
-            // Logika untuk menambahkan ke keranjang (simulasi)
-            alert('Produk ditambahkan ke keranjang!');
-        }
-        function addToWishlist(){
-            const namaProduk = "Dress Batik Modern Kawung";
-            const gambar = document.getElementById("mainProductImage").src;
-            const harga = 450000;
-
-            const Wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-            Wishlist.push({nama: namaProduk, gambar: gambar, harga});
-            localStorage.setItem("wishlist", JSON.stringify(Wishlist));
-
-            alert("Produk ditambahkan ke wishlist!");
-        }
-
-        document.getElementById("formUlasan").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const nama = document.getElementById("nama").value;
-    const rating = document.getElementById("rating").value;
-    const komentar = document.getElementById("komentar").value;
-
-    const ulasan = {
-        nama,
-        rating,
-        komentar,
-        tanggal: new Date().toLocaleDateString("id-ID")
-    };
-
-    let daftar = JSON.parse(localStorage.getItem("ulasan")) || [];
-    daftar.push(ulasan);
-    localStorage.setItem("ulasan", JSON.stringify(daftar));
-
-    alert("Terima kasih atas ulasannya!");
-
-    document.getElementById("formUlasan").reset();
-    tampilkanUlasan();
-});
-
-function tampilkanUlasan() {
-    const daftarUlasan = JSON.parse(localStorage.getItem("ulasan")) || [];
-    const container = document.getElementById("daftarUlasan");
-    container.innerHTML = "";
-
-    daftarUlasan.forEach(u => {
-        container.innerHTML += `
-            <div style="margin-bottom:1rem;">
-                <strong>${u.nama}</strong> (${u.rating}⭐) - ${u.tanggal}<br>
-                <em>${u.komentar}</em>
-            </div>
-        `;
-    });
-}
-
-// Tampilkan saat halaman pertama kali dibuka
-tampilkanUlasan();
-
-
-
-=======
         };
->>>>>>> aa2473525c5efde6173aeb97f450e979e1dfa174
     </script>
     <script>
 document.querySelector('.btn-add-to-cart').addEventListener('click', function() {
