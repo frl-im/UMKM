@@ -138,13 +138,6 @@
                     <div class="info-item"><i class="fas fa-undo"></i> <span>15 Hari Pengembalian</span></div>
                     <div class="info-item"><i class="fas fa-gem"></i> <span>100% Produk Lokal Asli</span></div>
                 </div>
-<<<<<<< Updated upstream
-
-                <div class="action-buttons">
-                    <button class="btn btn-add-to-cart" onclick="addToCart()"><i class="fas fa-cart-plus"></i> Tambah ke Keranjang</button>
-                    <a href="checkout.html" class="btn btn-buy-now">Beli Sekarang</a>
-                    <button class="btn btn-add-to-cart" onclick="addToWishlist()">❤ Tambah ke Wishlist</button>
-=======
                 <div class="variant-group">
                     <label>Pilih Warna:</label>
                     <div class="variant-buttons">
@@ -152,7 +145,6 @@
                         <button>Biru Dongker</button>
                         <button>Hijau Botol</button>
                     </div>
->>>>>>> Stashed changes
                 </div>
             </div>
         </div>
@@ -360,41 +352,7 @@
                 // Tampilkan pesan jika produk tidak ditemukan
                 document.getElementById('product-detail-container').innerHTML = '<h1>404 - Produk Tidak Ditemukan</h1><p>Maaf, produk yang Anda cari tidak ada. Silakan kembali ke <a href="index.html">halaman utama</a>.</p>';
             }
-<<<<<<< Updated upstream
-        }
-        
-        // Fungsi untuk memilih opsi (warna/ukuran)
-        function setupOptionButtons(containerId) {
-            const container = document.getElementById(containerId);
-            container.addEventListener('click', function(e) {
-                if (e.target.tagName === 'BUTTON') {
-                    // Hapus kelas 'active' dari semua tombol di grup ini
-                    container.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-                    // Tambahkan kelas 'active' ke tombol yang diklik
-                    e.target.classList.add('active');
-                }
-            });
-        }
 
-        setupOptionButtons('colorOptions');
-        setupOptionButtons('sizeOptions');
-
-        function addToCart() {
-            // Logika untuk menambahkan ke keranjang (simulasi)
-            alert('Produk ditambahkan ke keranjang!');
-        }
-        function addToWishlist(){
-            const namaProduk = "Dress Batik Modern Kawung";
-            const gambar = document.getElementById("mainProductImage").src;
-            const harga = 450000;
-
-            const Wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-            Wishlist.push({nama: namaProduk, gambar: gambar, harga});
-            localStorage.setItem("wishlist", JSON.stringify(Wishlist));
-
-            alert("Produk ditambahkan ke wishlist!");
-        }
-=======
         };
 >>>>>>> Stashed changes
     </script>
