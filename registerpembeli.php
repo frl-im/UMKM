@@ -3,7 +3,7 @@ require 'fungsi.php';
 
 // Cek apakah tombol register sudah ditekan
 if (isset($_POST["register"])) {
-    if (register_pembeli($_POST) > 0) {
+    if (registerpembeli($_POST) > 0) {
         echo "<script>
                 alert('Registrasi berhasil! Silakan login.');
                 window.location.href='loginpembeli.php';

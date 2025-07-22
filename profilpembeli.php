@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'config/database.php';
 
 // Ambil data pengguna dari database
-$stmt = $pdo->prepare("SELECT name, email FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT fullname, email FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch();
 ?>
@@ -27,7 +27,7 @@ $user = $stmt->fetch();
 <body>
     <header class="navbar">
         <div class="container">
-            <div class="logo"><a href="index.html">KreasiLokal.id</a></div>
+            <div class="logo"><a href="index.php">KreasiLokal.id</a></div>
             <!-- Tautan Logout -->
             <a href="logout.php">Logout</a>
         </div>
@@ -45,7 +45,7 @@ $user = $stmt->fetch();
                         <div class="form-group">
                             <label for="fullname">Nama Lengkap</label>
                             <!-- Menampilkan nama pengguna dari database -->
-                            <input type="text" id="fullname" value="<?php echo htmlspecialchars($user['name']); ?>">
+                            <input type="text" id="fullname" value="<?php echo htmlspecialchars($user['fullname']); ?>">
                         </div>
                         <div class="form-group">
                             <label for="email">Email</label>

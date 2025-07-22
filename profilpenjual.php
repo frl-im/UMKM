@@ -161,7 +161,7 @@
         <main class="dashboard-main">
             <header class="main-header">
                 <h2>Selamat Datang, Toko Batik Juwita!</h2>
-                <a href="uploadproduk.html" class="btn-primary"><i class="fas fa-plus"></i> Tambah Produk Baru</a>
+                <a href="uploadproduk.php" class="btn-primary"><i class="fas fa-plus"></i> Tambah Produk Baru</a>
             </header>
 
             <!-- Ringkasan Statistik -->
