@@ -120,6 +120,74 @@ function login_user($data) {
     return false; // Login gagal
 }
 
+
+// FUNGSI BARU UNTUK ALUR VERIFIKASI
+
+/**
+ * Memproses dan menyimpan data verifikasi diri penjual.
+ * @return bool - True jika berhasil, false jika gagal.
+ */
+// Contoh konseptual di dalam fungsi proses_verifikasi_data_diri() di fungsi.php
+
+function proses_verifikasi_data_diri($data, $files) {
+    // ... (kode yang sudah ada untuk memproses NIK, nama, dan KTP)
+
+    // 1. Terima data gambar wajah dari form
+    $face_image_base64 = $data['face_image_data'];
+    
+    // 2. Simpan foto wajah ke file (opsional tapi direkomendasikan)
+    // Anda perlu mengubah data base64 kembali menjadi file gambar.
+    // list($type, $face_image_base64) = explode(';', $face_image_base64);
+    // list(, $face_image_base64)      = explode(',', $face_image_base64);
+    // $face_image_data_decoded = base64_decode($face_image_base64);
+    // $face_image_filename = 'uploads/faces/' . uniqid() . '.jpg';
+    // file_put_contents($face_image_filename, $face_image_data_decoded);
+
+    // 3. KIRIM DATA KE API VERIFIKASI
+    // Ini adalah bagian di mana Anda berinteraksi dengan API pihak ketiga.
+    // $api_response = call_face_verification_api(
+    //     'path/to/ktp_image.jpg',  // Path file KTP yang diupload
+    //     $face_image_filename     // Path file foto wajah yang baru diambil
+    // );
+
+    // 4. Proses respons dari API
+    // if ($api_response['is_match'] == true && $api_response['liveness'] == 'passed') {
+    //      // Jika cocok dan wajahnya asli, update status verifikasi ke 1
+    //      // UPDATE users SET verification_status = 1 WHERE id = ...
+    //      return true;
+    // } else {
+    //      // Jika tidak cocok, kembalikan false
+    //      return false;
+    // }
+
+    // Untuk sekarang, kita anggap berhasil dan langsung update status.
+    // Hapus bagian ini jika Anda sudah mengintegrasikan API asli.
+    global $koneksi;
+    $user_id = $_SESSION['user_id'];
+    mysqli_query($koneksi, "UPDATE users SET verification_status = 1 WHERE id = $user_id");
+    return true; // Asumsi berhasil untuk development
+}
+
+/**
+ * Memproses dan menyimpan informasi toko penjual.
+ * @return bool - True jika berhasil, false jika gagal.
+ */
+function proses_informasi_toko($data) {
+    global $koneksi;
+    $user_id = $_SESSION['user_id'];
+
+    // Sanitasi data
+    $store_name = mysqli_real_escape_string($koneksi, $data['store_name']);
+    $store_address = mysqli_real_escape_string($koneksi, $data['store_address']);
+    
+    // Update data di database
+    $stmt = mysqli_prepare($koneksi, "UPDATE users SET store_name = ?, store_address = ?, verification_status = 2 WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "ssi", $store_name, $store_address, $user_id);
+    
+    return mysqli_stmt_execute($stmt);
+}
+
+
 // Fungsi untuk Upload Produk - DIPERBAIKI
 function upload_produk($data, $files) {
     global $koneksi;
@@ -131,7 +199,7 @@ function upload_produk($data, $files) {
     
     // Pastikan seller_id ada di session dan user adalah penjual
     if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'penjual') {
-        return false;
+        return ['status' => false, 'message' => 'Akses ditolak. Hanya penjual yang dapat mengunggah produk.'];
     }
     
     $seller_id = $_SESSION['user_id'];
@@ -140,62 +208,110 @@ function upload_produk($data, $files) {
     if (empty($data['product-name']) || empty($data['product-description']) || 
         empty($data['product-price']) || empty($data['product-category']) || 
         empty($data['product-stock'])) {
-        return false;
+        return ['status' => false, 'message' => 'Semua field harus diisi!'];
     }
 
-    $name = mysqli_real_escape_string($koneksi, $data['product-name']);
-    $description = mysqli_real_escape_string($koneksi, $data['product-description']);
-    $price = (float)$data['product-price']; // Gunakan float untuk harga
+    // Sanitasi dan validasi data
+    $name = mysqli_real_escape_string($koneksi, trim($data['product-name']));
+    $description = mysqli_real_escape_string($koneksi, trim($data['product-description']));
+    $price = filter_var($data['product-price'], FILTER_VALIDATE_FLOAT);
     $category = mysqli_real_escape_string($koneksi, $data['product-category']);
-    $stock = (int)$data['product-stock'];
+    $stock = filter_var($data['product-stock'], FILTER_VALIDATE_INT);
+
+    // Validasi harga dan stok
+    if ($price === false || $price <= 0) {
+        return ['status' => false, 'message' => 'Harga harus berupa angka positif!'];
+    }
+    
+    if ($stock === false || $stock < 0) {
+        return ['status' => false, 'message' => 'Stok harus berupa angka non-negatif!'];
+    }
+
+    // Validasi kategori
+    $allowed_categories = ['kerajinan', 'makanan', 'fashion', 'lainnya'];
+    if (!in_array($category, $allowed_categories)) {
+        return ['status' => false, 'message' => 'Kategori tidak valid!'];
+    }
 
     // Validasi file upload
     if (!isset($files['product-image']) || $files['product-image']['error'] !== UPLOAD_ERR_OK) {
-        return false;
+        $error_messages = [
+            UPLOAD_ERR_INI_SIZE => 'File terlalu besar (melebihi upload_max_filesize).',
+            UPLOAD_ERR_FORM_SIZE => 'File terlalu besar (melebihi MAX_FILE_SIZE).',
+            UPLOAD_ERR_PARTIAL => 'File hanya terupload sebagian.',
+            UPLOAD_ERR_NO_FILE => 'Tidak ada file yang dipilih.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Folder temporary tidak ditemukan.',
+            UPLOAD_ERR_CANT_WRITE => 'Gagal menulis file ke disk.',
+            UPLOAD_ERR_EXTENSION => 'Upload dihentikan oleh ekstensi PHP.'
+        ];
+        
+        $error_code = $files['product-image']['error'] ?? UPLOAD_ERR_NO_FILE;
+        $message = $error_messages[$error_code] ?? 'Terjadi kesalahan saat upload file.';
+        
+        return ['status' => false, 'message' => $message];
     }
 
-    // Validasi tipe file
-    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    $file_type = $files['product-image']['type'];
-    if (!in_array($file_type, $allowed_types)) {
-        return false;
+    // Validasi tipe file menggunakan finfo
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_file($finfo, $files['product-image']['tmp_name']);
+    finfo_close($finfo);
+    
+    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!in_array($mime_type, $allowed_types)) {
+        return ['status' => false, 'message' => 'Tipe file tidak diizinkan. Gunakan JPG, PNG, GIF, atau WebP.'];
     }
 
     // Validasi ukuran file (maksimal 5MB)
     $max_size = 5 * 1024 * 1024; // 5MB
     if ($files['product-image']['size'] > $max_size) {
-        return false;
+        return ['status' => false, 'message' => 'Ukuran file maksimal 5MB.'];
     }
 
     // Logika upload gambar
     $namaFile = $files['product-image']['name'];
     $tmpName = $files['product-image']['tmp_name'];
-    $extension = pathinfo($namaFile, PATHINFO_EXTENSION);
+    $extension = strtolower(pathinfo($namaFile, PATHINFO_EXTENSION));
     $namaFileBaru = uniqid() . '_' . time() . '.' . $extension;
-    $folder = 'uploads/';
+    $folder = 'uploads/products/';
 
     // Buat folder jika belum ada
     if (!file_exists($folder)) {
-        mkdir($folder, 0777, true);
+        mkdir($folder, 0755, true);
+    }
+
+    // Cek apakah nama produk sudah ada untuk seller ini
+    $check_name = "SELECT name FROM products WHERE seller_id = '$seller_id' AND name = '$name' AND status = 'active'";
+    $result = mysqli_query($koneksi, $check_name);
+    if (mysqli_num_rows($result) > 0) {
+        return ['status' => false, 'message' => 'Nama produk sudah ada di toko Anda!'];
     }
 
     if (move_uploaded_file($tmpName, $folder . $namaFileBaru)) {
         $imageUrl = $folder . $namaFileBaru;
         
-        // Perbaikan: Tambahkan created_at dan status produk
-        $query = "INSERT INTO products (seller_id, name, description, price, category, stock, image_url, created_at, status) 
-                  VALUES ('$seller_id', '$name', '$description', '$price', '$category', '$stock', '$imageUrl', NOW(), 'active')";
+        // Gunakan prepared statement untuk keamanan
+        $stmt = mysqli_prepare($koneksi, "INSERT INTO products (seller_id, name, description, price, category, stock, image_url, created_at, updated_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 'active')");
+        mysqli_stmt_bind_param($stmt, "issdsis", $seller_id, $name, $description, $price, $category, $stock, $imageUrl);
         
-        $result = mysqli_query($koneksi, $query);
+        $result = mysqli_stmt_execute($stmt);
         if ($result) {
-            return mysqli_affected_rows($koneksi);
+    // Update status penjual menjadi sepenuhnya aktif setelah upload produk pertama
+    mysqli_query($koneksi, "UPDATE users SET verification_status = 3 WHERE id = $seller_id AND verification_status < 3");
+    
+    mysqli_stmt_close($stmt);
+    return ['status' => true, 'message' => 'Produk berhasil ditambahkan!', 'product_id' => mysqli_insert_id($koneksi)];
+}
+        if ($result) {
+            mysqli_stmt_close($stmt);
+            return ['status' => true, 'message' => 'Produk berhasil ditambahkan!', 'product_id' => mysqli_insert_id($koneksi)];
         } else {
+            mysqli_stmt_close($stmt);
             // Hapus file jika query gagal
             unlink($folder . $namaFileBaru);
-            return false;
+            return ['status' => false, 'message' => 'Gagal menyimpan data produk ke database.'];
         }
     } else {
-        return false;
+        return ['status' => false, 'message' => 'Gagal mengunggah file gambar.'];
     }
 }
 
@@ -204,12 +320,22 @@ function get_user_by_id($user_id) {
     global $koneksi;
     
     $user_id = (int)$user_id;
+    // Query diperbaiki dengan menghapus "AND status = 'active'"
     $query = "SELECT * FROM users WHERE id = $user_id";
+    
     $result = mysqli_query($koneksi, $query);
+    
+    // --- PERBAIKAN UTAMA ---
+    // Cek apakah query gagal. Jika ya, kembalikan false agar tidak error.
+    if ($result === false) {
+        // Baris ini akan mencegah fatal error di mysqli_num_rows()
+        return false; 
+    }
     
     if (mysqli_num_rows($result) === 1) {
         return mysqli_fetch_assoc($result);
     }
+    
     return false;
 }
 
@@ -259,6 +385,16 @@ function logout_user() {
     session_unset();
     session_destroy();
     return true;
+}
+
+// Fungsi untuk sanitasi output (mencegah XSS)
+function safe_output($text) {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+// Fungsi untuk format harga
+function format_price($price) {
+    return 'Rp ' . number_format($price, 0, ',', '.');
 }
 
 ?>
