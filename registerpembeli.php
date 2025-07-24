@@ -104,7 +104,7 @@ if (isset($_POST["register"])) {
     }
 
     .form-footer a {
-      color: #34A853;
+      color: #1A0DAB;
       text-decoration: none;
       font-weight: 500;
     }
