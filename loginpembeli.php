@@ -20,7 +20,7 @@ if (isset($_POST["login"])) {
     <title>Login Pembeli - KreasiLokal.id</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #34A853; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
         .login-box { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         .login-box h2 { text-align: center; margin-bottom: 1.5rem; color: #333; }
         .form-group { margin-bottom: 1rem; }
