@@ -1,6 +1,6 @@
 <?php
 // loginpembeli.php
-require 'fungsi.php';
+require_once 'fungsi.php';
 
 if (isset($_POST["login"])) {
     if (login_user($_POST) === true) {
@@ -40,6 +40,14 @@ if (isset($_POST["login"])) {
         
         <?php if (isset($_GET['status']) && $_GET['status'] == 'reg_success'): ?>
             <p class="success">Registrasi berhasil! Silakan login.</p>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['status']) && $_GET['status'] == 'logged_out'): ?>
+            <p class="success">Anda telah berhasil logout.</p>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['error']) && $_GET['error'] == 'session_expired'): ?>
+            <p class="error">Session Anda telah berakhir. Silakan login kembali.</p>
         <?php endif; ?>
         
         <?php if (isset($error)): ?>

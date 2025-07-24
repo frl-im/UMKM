@@ -42,6 +42,14 @@ if (isset($_POST["login"])) {
             <p class="success">Registrasi berhasil! Silakan login.</p>
         <?php endif; ?>
 
+         <?php if (isset($_GET['status']) && $_GET['status'] == 'logged_out'): ?>
+            <p class="success">Anda telah berhasil logout.</p>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['error']) && $_GET['error'] == 'session_expired'): ?>
+            <p class="error">Session Anda telah berakhir. Silakan login kembali.</p>
+        <?php endif; ?>
+
         <?php if (isset($error)): ?>
             <p class="error">Email atau password salah!</p>
         <?php endif; ?>

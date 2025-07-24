@@ -1,3 +1,11 @@
+<?php
+// profilpembeli.php
+require_once 'fungsi.php';
+// Pastikan hanya pembeli yang bisa akses
+check_login('pembeli');
+?>
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -216,7 +224,7 @@
         </a>
       </div>
       <div>
-        <a href="index.html">Kembali ke Beranda</a>
+        <a href="index.php">Kembali ke Beranda</a>
       </div>
     </nav>
   </header>

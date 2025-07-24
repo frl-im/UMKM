@@ -1,4 +1,10 @@
 <?php
+
+ini_set('session.cookie_lifetime', 7200); // 1 jam
+ini_set('session.gc_maxlifetime', 7200);
+ini_set('session.cookie_httponly', 2);
+ini_set('session.use_only_cookies', 2);
+
 // --- KONEKSI KE DATABASE ---
 $koneksi = mysqli_connect("localhost", "root", "", "Kreasidb");
 
@@ -19,6 +25,22 @@ function query($query) {
         $rows[] = $row;
     }
     return $rows;
+}
+
+function start_secure_session() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    
+    // Regenerasi session ID setiap 30 menit (bukan 15)
+    if (!isset($_SESSION['last_regeneration'])) {
+        $_SESSION['last_regeneration'] = time();
+    } elseif (time() - $_SESSION['last_regeneration'] > 1800) { // 30 menit
+        $old_session_data = $_SESSION; // Backup data
+        session_regenerate_id(true);
+        $_SESSION = $old_session_data; // Restore data
+        $_SESSION['last_regeneration'] = time();
+    }
 }
 
 // --- FUNGSI-FUNGSI UNTUK MENGELOLA DATA PENGGUNA ---
@@ -99,19 +121,20 @@ function login_user($data) {
     if (mysqli_num_rows($result) === 1) {
         $user = mysqli_fetch_assoc($result);
         if (password_verify($password, $user['password_hash'])) {
-            // Mulai session jika belum dimulai
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
+            // Mulai session dengan aman
+            start_secure_session();
             
             // Simpan info pengguna di session
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['user_name'] = $user['fullname'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['login_time'] = time();
             
             // Untuk penjual, simpan juga nama toko
             if ($user['role'] == 'penjual') {
                 $_SESSION['store_name'] = $user['store_name'];
+                $_SESSION['verification_status'] = $user['verification_status'];
             }
             
             return true; // Login berhasil
@@ -122,12 +145,6 @@ function login_user($data) {
 
 
 // FUNGSI BARU UNTUK ALUR VERIFIKASI
-
-/**
- * Memproses dan menyimpan data verifikasi diri penjual.
- * @return bool - True jika berhasil, false jika gagal.
- */
-// Contoh konseptual di dalam fungsi proses_verifikasi_data_diri() di fungsi.php
 
 function proses_verifikasi_data_diri($data, $files) {
     // ... (kode yang sudah ada untuk memproses NIK, nama, dan KTP)
@@ -301,20 +318,26 @@ function upload_produk($data, $files) {
     mysqli_stmt_close($stmt);
     return ['status' => true, 'message' => 'Produk berhasil ditambahkan!', 'product_id' => mysqli_insert_id($koneksi)];
 }
-        if ($result) {
-            mysqli_stmt_close($stmt);
-            return ['status' => true, 'message' => 'Produk berhasil ditambahkan!', 'product_id' => mysqli_insert_id($koneksi)];
-        } else {
-            mysqli_stmt_close($stmt);
-            // Hapus file jika query gagal
-            unlink($folder . $namaFileBaru);
-            return ['status' => false, 'message' => 'Gagal menyimpan data produk ke database.'];
-        }
     } else {
         return ['status' => false, 'message' => 'Gagal mengunggah file gambar.'];
     }
 }
 
+function get_logged_user() {
+    start_secure_session();
+    
+    if (!isset($_SESSION['user_id'])) {
+        return false;
+    }
+    
+    return [
+        'id' => $_SESSION['user_id'],
+        'name' => $_SESSION['user_name'],
+        'email' => $_SESSION['user_email'],
+        'role' => $_SESSION['user_role'],
+        'store_name' => $_SESSION['store_name'] ?? null
+    ];
+}
 // Fungsi untuk mendapatkan data user berdasarkan ID
 function get_user_by_id($user_id) {
     global $koneksi;
@@ -350,39 +373,53 @@ function get_products_by_seller($seller_id) {
 
 // Fungsi untuk cek session dan redirect jika tidak login
 function check_login($required_role = null) {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+    start_secure_session();
     
-    if (!isset($_SESSION['user_id'])) {
-        if ($required_role === 'penjual') {
-            header("Location: loginpenjual.php");
-        } else {
-            header("Location: loginpembeli.php");
+    // Cek session validity
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['login_time'])) {
+        if ($required_role !== null) {
+            redirect_to_login($required_role);
         }
-        exit();
+        return false;
     }
     
-    // Jika role tertentu diperlukan
+    // Perpanjang session timeout menjadi 2 jam
+    if (time() - $_SESSION['login_time'] > 7200) { // 2 jam
+        session_unset();
+        session_destroy();
+        if ($required_role !== null) {
+            redirect_to_login($required_role);
+        }
+        return false;
+    }
+    
+    // Update last activity (jangan update login_time)
+    $_SESSION['last_activity'] = time();
+    
+    // Role check
     if ($required_role && $_SESSION['user_role'] !== $required_role) {
-        if ($required_role === 'penjual') {
-            header("Location: loginpenjual.php");
-        } else {
-            header("Location: loginpembeli.php");
-        }
-        exit();
+        redirect_to_login($required_role);
+        return false;
     }
     
     return true;
 }
-
 // Fungsi untuk logout
 function logout_user() {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+    start_secure_session();
+    
+    // Hapus semua data session
+    $_SESSION = array();
+    
+    // Hapus cookie session jika ada
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
     }
     
-    session_unset();
     session_destroy();
     return true;
 }
@@ -395,6 +432,36 @@ function safe_output($text) {
 // Fungsi untuk format harga
 function format_price($price) {
     return 'Rp ' . number_format($price, 0, ',', '.');
+}
+
+function redirect_to_login($required_role = null) {
+    if ($required_role === 'penjual') {
+        header("Location: loginpenjual.php");
+    } else {
+        header("Location: loginpembeli.php");
+    }
+    exit();
+}
+
+// === FUNGSI UNTUK CEK STATUS SESSION ===
+function is_logged_in() {
+    start_secure_session();
+    return isset($_SESSION['user_id']) && isset($_SESSION['login_time']);
+}
+
+
+//  TAMBAHAN: FUNGSI UNTUK DEBUGGING SESSION
+function debug_session_status() {
+    error_log("=== SESSION DEBUG ===");
+    error_log("Session Status: " . session_status());
+    error_log("Session ID: " . session_id());
+    error_log("User ID: " . ($_SESSION['user_id'] ?? 'NOT SET'));
+    error_log("Login Time: " . ($_SESSION['login_time'] ?? 'NOT SET'));
+    error_log("Current Time: " . time());
+    if (isset($_SESSION['login_time'])) {
+        error_log("Time Diff: " . (time() - $_SESSION['login_time']) . " seconds");
+    }
+    error_log("===================");
 }
 
 ?>

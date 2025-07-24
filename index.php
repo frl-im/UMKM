@@ -1,6 +1,6 @@
 <?php
 
-   $koneksi = mysqli_connect("localhost:3306","root","","webti");
+   $koneksi = mysqli_connect("localhost:3306","root","","Kreasidb");
 
    if(!$koneksi)
    {
@@ -10,6 +10,11 @@
    {
         echo "Koneksi Berhasil!!!";
    }
+
+   require_once 'fungsi.php';
+
+// Cek apakah user sudah login tanpa redirect paksa
+$is_logged_in = is_logged_in();
 
 ?>
 
@@ -431,7 +436,7 @@
         <button><i class="fas fa-search"></i></button>
       </div>
       <div class="nav-icons">
-        <a href="login.html" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+        <a href="login.php" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
         <a href="keranjang.php" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
       </div>
     </div>

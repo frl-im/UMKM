@@ -1,3 +1,11 @@
+<?php
+// profilpembeli.php
+require_once 'fungsi.php';
+// Pastikan hanya pembeli yang bisa akses
+check_login('pembeli');
+?>
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
