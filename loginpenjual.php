@@ -12,6 +12,7 @@ if (isset($_POST["login"])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,7 +32,7 @@ if (isset($_POST["login"])) {
         .error { color: red; font-style: italic; text-align: center; margin-bottom: 1rem; }
         .success { color: green; text-align: center; margin-bottom: 1rem; }
         p { text-align: center; margin-top: 1rem; }
-        a { color: #34A853; text-decoration: none; }
+        a { color: #1A0DAB; text-decoration: none; }
     </style>
 </head>
 <body>
