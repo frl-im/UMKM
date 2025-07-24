@@ -20,18 +20,18 @@ if (isset($_POST["login"])) {
     <title>Login Penjual - KreasiLokal.id</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #34A853; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
         .login-box { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         .login-box h2 { text-align: center; margin-bottom: 1.5rem; color: #333; }
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
         .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 0.75rem; background: #ff8c00; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
-        button:hover { background: #e67c00; }
+        button { width: 100%; padding: 0.75rem; background: #34A853; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; }
+        button:hover { background: #34A853; }
         .error { color: red; font-style: italic; text-align: center; margin-bottom: 1rem; }
         .success { color: green; text-align: center; margin-bottom: 1rem; }
         p { text-align: center; margin-top: 1rem; }
-        a { color: #ff8c00; text-decoration: none; }
+        a { color: #34A853; text-decoration: none; }
     </style>
 </head>
 <body>
