@@ -1,5 +1,5 @@
 <?php
-require_once '../fungsi.php'; // Menggunakan fungsi.php dengan koneksi mysqli
+require_once '../fungsi.php'; // Tambahkan ../ untuk keluar dari folder ajax
 header('Content-Type: application/json');
 
 // Fungsi bantuan untuk response JSON
@@ -129,6 +129,23 @@ switch ($action) {
 
     default:
         json_response('error', 'Aksi tidak valid.');
+        break;
+
+        case 'apply_voucher':
+        $voucher_code = $_POST['voucher_code'] ?? '';
+        if(empty($voucher_code)) {
+            json_response('error', 'Kode voucher tidak boleh kosong.');
+        }
+
+        $voucher = apply_voucher($voucher_code);
+        if ($voucher) {
+            // Simpan info voucher di session untuk digunakan saat checkout
+            $_SESSION['applied_voucher'] = $voucher;
+            json_response('success', 'Voucher berhasil diterapkan!', $voucher);
+        } else {
+            unset($_SESSION['applied_voucher']); // Hapus jika ada voucher lama
+            json_response('error', 'Voucher tidak valid atau sudah kedaluwarsa.');
+        }
         break;
 }
 ?>

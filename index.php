@@ -489,7 +489,7 @@ $products = ambil_semua_produk();
               
               <?php if ($user_role === 'penjual'): ?>
                 <a href="profilpenjual.php"><i class="fas fa-store"></i> Dashboard Penjual</a>
-                <a href="upload_produk.php"><i class="fas fa-plus"></i> Tambah Produk</a>
+                <a href="uploadproduk.php"><i class="fas fa-plus"></i> Tambah Produk</a>
               <?php else: ?>
                 <a href="profilpembeli.php"><i class="fas fa-user"></i> Profil Saya</a>
                 <a href="pesanan.php"><i class="fas fa-shopping-bag"></i> Pesanan Saya</a>

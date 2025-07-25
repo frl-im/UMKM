@@ -328,27 +328,52 @@ function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
     $pid = (int)$product_id;
     $qty = (int)$quantity;
 
+    // Cek dulu apakah produknya ada dan stoknya cukup
+    $product = ambil_produk_by_id($pid);
+    if (!$product) {
+        return ['status' => 'error', 'message' => 'Produk tidak ditemukan.'];
+    }
+
     // Cek apakah produk sudah ada di keranjang user
-    $stmt_check = mysqli_prepare($koneksi, "SELECT * FROM cart WHERE user_id = ? AND product_id = ?");
+    $stmt_check = mysqli_prepare($koneksi, "SELECT quantity FROM cart WHERE user_id = ? AND product_id = ?");
     mysqli_stmt_bind_param($stmt_check, "ii", $uid, $pid);
     mysqli_stmt_execute($stmt_check);
     $result_check = mysqli_stmt_get_result($stmt_check);
+    $existing_item = mysqli_fetch_assoc($result_check);
 
-    if (mysqli_num_rows($result_check) > 0) {
+    if ($existing_item) {
         // Jika sudah ada, update quantity
-        $stmt_update = mysqli_prepare($koneksi, "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?");
-        mysqli_stmt_bind_param($stmt_update, "iii", $qty, $uid, $pid);
-        mysqli_stmt_execute($stmt_update);
+        $new_quantity = $existing_item['quantity'] + $qty;
+        if ($new_quantity > $product['stock']) {
+            return ['status' => 'error', 'message' => 'Jumlah melebihi stok yang tersedia.'];
+        }
+
+        $stmt_update = mysqli_prepare($koneksi, "UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
+        mysqli_stmt_bind_param($stmt_update, "iii", $new_quantity, $uid, $pid);
+        
+        // PERBAIKAN: Cek apakah eksekusi berhasil
+        if (mysqli_stmt_execute($stmt_update)) {
+            return ['status' => 'success', 'message' => 'Jumlah produk di keranjang diperbarui!'];
+        } else {
+            return ['status' => 'error', 'message' => 'Gagal memperbarui keranjang.'];
+        }
     } else {
         // Jika belum ada, insert baru
+        if ($qty > $product['stock']) {
+            return ['status' => 'error', 'message' => 'Jumlah melebihi stok yang tersedia.'];
+        }
+
         $stmt_insert = mysqli_prepare($koneksi, "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
-        mysqli_stmt_bind_param($stmt_insert, "iii", $uid, $pid);
-        mysqli_stmt_execute($stmt_insert);
+        mysqli_stmt_bind_param($stmt_insert, "iii", $uid, $pid, $qty);
+
+        // PERBAIKAN: Cek apakah eksekusi berhasil
+        if (mysqli_stmt_execute($stmt_insert)) {
+            return ['status' => 'success', 'message' => 'Produk berhasil ditambahkan ke keranjang!'];
+        } else {
+            return ['status' => 'error', 'message' => 'Gagal menambahkan ke keranjang. Error: ' . mysqli_stmt_error($stmt_insert)];
+        }
     }
-
-    return ['status' => 'success', 'message' => 'Produk berhasil ditambahkan ke keranjang!'];
 }
-
 // FUNGSI BARU: Membuat pesanan dari keranjang
 function buat_pesanan_dari_keranjang($user_id, $payment_method, $shipping_address) {
     global $koneksi;
@@ -436,4 +461,81 @@ function ambil_daftar_percakapan($user_id, $user_role) {
 
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
+
+// TAMBAHKAN FUNGSI INI DI DALAM FILE FUNGSI.PHP
+function ambil_isi_keranjang($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    
+    $query = "
+        SELECT p.id, p.name, p.price, p.image_url, p.stock, c.quantity, u.store_name 
+        FROM cart c 
+        JOIN products p ON c.product_id = p.id 
+        JOIN users u ON p.seller_id = u.id
+        WHERE c.user_id = ? AND p.status = 'active'
+    ";
+    
+    $stmt = mysqli_prepare($koneksi, $query);
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+// TAMBAHKAN FUNGSI-FUNGSI INI KE DALAM FILE FUNGSI.PHP
+
+function get_primary_address($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $stmt = mysqli_prepare($koneksi, "SELECT * FROM user_addresses WHERE user_id = ? AND is_primary = 1 LIMIT 1");
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    return mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+}
+
+function apply_voucher($voucher_code) {
+    global $koneksi;
+    $code = mysqli_real_escape_string($koneksi, $voucher_code);
+    $stmt = mysqli_prepare($koneksi, "SELECT * FROM vouchers WHERE voucher_code = ? AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())");
+    mysqli_stmt_bind_param($stmt, "s", $code);
+    mysqli_stmt_execute($stmt);
+    return mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+}
+
+// TAMBAHKAN 3 FUNGSI INI KE DALAM FILE fungsi.php
+
+function get_all_addresses($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $stmt = mysqli_prepare($koneksi, "SELECT * FROM user_addresses WHERE user_id = ? ORDER BY is_primary DESC");
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    return mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
+}
+
+function add_address($user_id, $data) {
+    global $koneksi;
+    $uid = (int)$user_id;
+
+    // Cek apakah sudah ada alamat lain, jika tidak ada, jadikan ini utama
+    $existing_addresses = get_all_addresses($uid);
+    $is_primary = empty($existing_addresses) ? 1 : 0;
+
+    $stmt = mysqli_prepare($koneksi, "INSERT INTO user_addresses (user_id, label, recipient_name, phone, full_address, is_primary) VALUES (?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "issssi", $uid, $data['label'], $data['recipient_name'], $data['phone'], $data['full_address'], $is_primary);
+    return mysqli_stmt_execute($stmt);
+}
+
+function set_primary_address($user_id, $address_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $aid = (int)$address_id;
+    // Reset semua alamat lain menjadi bukan utama
+    mysqli_query($koneksi, "UPDATE user_addresses SET is_primary = 0 WHERE user_id = $uid");
+    // Set alamat yang dipilih menjadi utama
+    $stmt = mysqli_prepare($koneksi, "UPDATE user_addresses SET is_primary = 1 WHERE id = ? AND user_id = ?");
+    mysqli_stmt_bind_param($stmt, "ii", $aid, $uid);
+    return mysqli_stmt_execute($stmt);
+}
+
 ?>

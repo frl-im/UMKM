@@ -1,28 +1,18 @@
 <?php
-session_start();
-require_once 'config/database.php';
+require_once 'fungsi.php';
+// Gunakan check_login untuk melindungi halaman dan memulai sesi
+check_login('pembeli');
 
-$cartItems = [];
+// Fungsi ambil_isi_keranjang() harus sudah ada di fungsi.php
+$cartItems = ambil_isi_keranjang($_SESSION['user_id']);
 $totalPrice = 0;
-
-if (isset($_SESSION['user_id'])) {
-    $userId = $_SESSION['user_id'];
-    $stmt = $pdo->prepare("
-        SELECT p.id, p.name, p.price, p.image_url, p.stock, c.quantity 
-        FROM cart c 
-        JOIN products p ON c.product_id = p.id 
-        WHERE c.user_id = ? AND p.status = 'active'
-    ");
-    $stmt->execute([$userId]);
-    $cartItems = $stmt->fetchAll();
-}
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keranjang Belanja</title>
+    <title>Keranjang Belanja - KreasiLokal.id</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -38,7 +28,7 @@ if (isset($_SESSION['user_id'])) {
         }
         
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #34A853; /* Warna hijau khas Anda */
             padding: 1rem 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
@@ -50,6 +40,7 @@ if (isset($_SESSION['user_id'])) {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 2rem;
+            align-items: flex-start;
         }
         
         .card {
@@ -87,7 +78,7 @@ if (isset($_SESSION['user_id'])) {
         
         .item-price {
             font-weight: 600;
-            color: #667eea;
+            color: #34A853;
             font-size: 1.1rem;
         }
         
@@ -98,7 +89,7 @@ if (isset($_SESSION['user_id'])) {
         }
         
         .quantity-btn {
-            background: #667eea;
+            background: #34A853;
             color: white;
             border: none;
             width: 30px;
@@ -112,7 +103,7 @@ if (isset($_SESSION['user_id'])) {
         }
         
         .quantity-btn:hover {
-            background: #5a67d8;
+            background: #2a8747;
         }
         
         .quantity-btn:disabled {
@@ -145,7 +136,6 @@ if (isset($_SESSION['user_id'])) {
         .checkout-summary {
             position: sticky;
             top: 2rem;
-            height: fit-content;
         }
         
         .summary-row {
@@ -159,13 +149,13 @@ if (isset($_SESSION['user_id'])) {
             border-bottom: none;
             font-weight: 600;
             font-size: 1.2rem;
-            color: #667eea;
+            color: #34A853;
         }
         
         .btn-checkout {
             display: block;
             width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #34A853;
             color: white;
             text-decoration: none;
             text-align: center;
@@ -197,48 +187,25 @@ if (isset($_SESSION['user_id'])) {
             pointer-events: none;
         }
         
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .alert-error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
         
         @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .cart-item {
-                grid-template-columns: 60px 1fr;
-                gap: 0.5rem;
-            }
-            
-            .quantity-controls {
-                grid-column: 1 / -1;
-                justify-content: space-between;
-                margin-top: 0.5rem;
-            }
+            .container { grid-template-columns: 1fr; }
+            .cart-item { grid-template-columns: 60px 1fr auto; grid-template-areas: "img info remove" "qty qty qty"; }
+            .cart-item img { grid-area: img; }
+            .item-info { grid-area: info; }
+            .remove-btn { grid-area: remove; }
+            .quantity-controls { grid-area: qty; justify-content: flex-start; margin-top: 1rem; }
         }
     </style>
 </head>
 <body>
     <header class="navbar">
-        <div class="container">
+        <div style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 1rem;">
             <nav style="display: flex; justify-content: space-between; align-items: center; color: white;">
-                <h1><i class="fas fa-shopping-cart"></i> KreasiDB</h1>
+                <h1><a href="index.php" style="color:white; text-decoration:none;"><i class="fas fa-leaf"></i> KreasiLokal.id</a></h1>
                 <div>
                     <a href="index.php" style="color: white; text-decoration: none; margin-right: 1rem;">
                         <i class="fas fa-home"></i> Beranda
@@ -265,7 +232,7 @@ if (isset($_SESSION['user_id'])) {
                         <div class="empty-cart">
                             <i class="fas fa-shopping-cart"></i>
                             <h3>Keranjang Anda kosong</h3>
-                            <p>Mulai berbelanja dan tambahkan produk ke keranjang Anda</p>
+                            <p>Mulai berbelanja dan tambahkan produk ke keranjang Anda.</p>
                             <a href="index.php" class="btn-checkout" style="margin-top: 1rem; display: inline-block; width: auto; padding: 0.75rem 1.5rem;">
                                 <i class="fas fa-shopping-bag"></i> Mulai Belanja
                             </a>
@@ -273,11 +240,11 @@ if (isset($_SESSION['user_id'])) {
                     <?php else: ?>
                         <?php foreach ($cartItems as $item): ?>
                         <div class="cart-item" data-product-id="<?php echo $item['id']; ?>">
-                            <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                            <img src="<?php echo safe_output($item['image_url']); ?>" alt="<?php echo safe_output($item['name']); ?>">
                             
                             <div class="item-info">
-                                <h4><?php echo htmlspecialchars($item['name']); ?></h4>
-                                <div class="item-price">Rp <?php echo number_format($item['price']); ?></div>
+                                <h4><?php echo safe_output($item['name']); ?></h4>
+                                <div class="item-price"><?php echo format_price($item['price']); ?></div>
                                 <small style="color: #666;">Stok: <?php echo $item['stock']; ?></small>
                             </div>
                             
@@ -297,7 +264,7 @@ if (isset($_SESSION['user_id'])) {
                             </div>
                             
                             <div class="item-total">
-                                Rp <span class="item-total-price"><?php echo number_format($item['price'] * $item['quantity']); ?></span>
+                                <span class="item-total-price"><?php echo format_price($item['price'] * $item['quantity']); ?></span>
                             </div>
                             
                             <button class="remove-btn" onclick="removeFromCart(<?php echo $item['id']; ?>)">
@@ -320,7 +287,7 @@ if (isset($_SESSION['user_id'])) {
                 
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span id="subtotal">Rp <?php echo number_format($totalPrice); ?></span>
+                    <span id="subtotal"><?php echo format_price($totalPrice); ?></span>
                 </div>
                 <div class="summary-row">
                     <span>Ongkos Kirim</span>
@@ -328,7 +295,7 @@ if (isset($_SESSION['user_id'])) {
                 </div>
                 <div class="summary-row">
                     <span>Total</span>
-                    <span id="total">Rp <?php echo number_format($totalPrice); ?></span>
+                    <span id="total"><?php echo format_price($totalPrice); ?></span>
                 </div>
                 
                 <a href="checkout.php" class="btn-checkout" id="checkout-btn">
@@ -340,140 +307,41 @@ if (isset($_SESSION['user_id'])) {
     </main>
 
     <script>
-        function showAlert(type, message) {
-            const alertContainer = document.getElementById('alert-container');
-            alertContainer.innerHTML = `
-                <div class="alert alert-${type}">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                    ${message}
-                </div>
-            `;
-            
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
-        }
-
+        // ... (Kode JavaScript lengkap Anda untuk update, remove, dan kalkulasi total) ...
+        // PASTIKAN SEMUA FETCH MENGARAH KE 'ajax/ajax_handler.php'
         function updateQuantity(productId, newQuantity) {
             if (newQuantity < 1) return;
             
-            const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
-            cartItem.classList.add('loading');
-            
-            const formData = new FormData();
-            formData.append('action', 'update_cart');
-            formData.append('product_id', productId);
-            formData.append('quantity', newQuantity);
-            
-            fetch('app_logic.php', {
+            fetch('ajax/ajax_handler.php', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=update_cart&product_id=${productId}&quantity=${newQuantity}`
             })
-            .then(response => response.json())
-            .then(data => {
-                cartItem.classList.remove('loading');
-                
-                if (data.status === 'success') {
-                    // Update quantity input
-                    const quantityInput = cartItem.querySelector('.quantity-input');
-                    quantityInput.value = newQuantity;
-                    
-                    // Update item total
-                    const price = parseFloat(cartItem.querySelector('.item-price').textContent.replace(/[^0-9]/g, ''));
-                    const itemTotal = cartItem.querySelector('.item-total-price');
-                    itemTotal.textContent = (price * newQuantity).toLocaleString('id-ID');
-                    
-                    // Update buttons state
-                    const minusBtn = cartItem.querySelector('.quantity-btn');
-                    const plusBtn = cartItem.querySelectorAll('.quantity-btn')[1];
-                    const maxQuantity = parseInt(cartItem.querySelector('.quantity-input').getAttribute('max'));
-                    
-                    minusBtn.disabled = newQuantity <= 1;
-                    plusBtn.disabled = newQuantity >= maxQuantity;
-                    
-                    // Recalculate total
-                    calculateTotal();
-                    
-                    showAlert('success', data.message);
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    location.reload(); // Reload halaman untuk update total
                 } else {
-                    showAlert('error', data.message);
+                    alert(data.message);
                 }
-            })
-            .catch(error => {
-                cartItem.classList.remove('loading');
-                showAlert('error', 'Terjadi kesalahan jaringan');
-                console.error('Error:', error);
             });
         }
 
         function removeFromCart(productId) {
-            if (!confirm('Apakah Anda yakin ingin menghapus item ini dari keranjang?')) {
-                return;
-            }
+            if (!confirm('Hapus item ini dari keranjang?')) return;
             
-            const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
-            cartItem.classList.add('loading');
-            
-            const formData = new FormData();
-            formData.append('action', 'remove_from_cart');
-            formData.append('product_id', productId);
-            
-            fetch('app_logic.php', {
+            fetch('ajax/ajax_handler.php', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=remove_from_cart&product_id=${productId}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    cartItem.remove();
-                    calculateTotal();
-                    
-                    // Check if cart is empty
-                    const remainingItems = document.querySelectorAll('.cart-item');
-                    if (remainingItems.length === 0) {
-                        location.reload(); // Reload to show empty cart message
-                    }
-                    
-                    showAlert('success', data.message);
+            .then(res => res.json()).then(data => {
+                if(data.status === 'success') {
+                    location.reload(); // Reload halaman
                 } else {
-                    cartItem.classList.remove('loading');
-                    showAlert('error', data.message);
+                    alert(data.message);
                 }
-            })
-            .catch(error => {
-                cartItem.classList.remove('loading');
-                showAlert('error', 'Terjadi kesalahan jaringan');
-                console.error('Error:', error);
             });
         }
-
-        function calculateTotal() {
-            let total = 0;
-            document.querySelectorAll('.cart-item').forEach(item => {
-                const price = parseFloat(item.querySelector('.item-price').textContent.replace(/[^0-9]/g, ''));
-                const quantity = parseInt(item.querySelector('.quantity-input').value);
-                total += price * quantity;
-            });
-            
-            document.getElementById('subtotal').textContent = 'Rp ' + total.toLocaleString('id-ID');
-            document.getElementById('total').textContent = 'Rp ' + total.toLocaleString('id-ID');
-        }
-
-        // Auto-save quantity changes after typing
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('quantity-input')) {
-                const productId = e.target.closest('.cart-item').getAttribute('data-product-id');
-                const newQuantity = parseInt(e.target.value);
-                const maxQuantity = parseInt(e.target.getAttribute('max'));
-                
-                if (newQuantity > 0 && newQuantity <= maxQuantity) {
-                    clearTimeout(e.target.saveTimeout);
-                    e.target.saveTimeout = setTimeout(() => {
-                        updateQuantity(productId, newQuantity);
-                    }, 1000);
-                }
-            }
-        });
     </script>
 </body>
 </html>
