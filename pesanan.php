@@ -55,7 +55,7 @@
                     <p style="color: #d9534f; font-weight: bold;">Menunggu Pembayaran</p>
                 </div>
                 <div class="order-product">
-                    <img src="https://via.placeholder.com/150" alt="Produk">
+                    <img src="https://dynamic.zacdn.com/CAqpEXN0152sEQHTIO3s3RVPYCE=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/arjuna-weda-6040-2520944-3.jpg" alt="Produk">
                     <div>
                         <h4>Kemeja Batik Mega Mendung</h4>
                         <p>1 x Rp150.000</p>
