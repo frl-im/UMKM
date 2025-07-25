@@ -52,6 +52,7 @@ require_once 'fungsi.php';
             <h2>Pesanan Saya</h2>
         </div>
         <div class="tabs">
+<<<<<<< HEAD
             <div class="tab-item active" data-tab="belum-bayar">Belum Bayar</div>
             <div class="tab-item" data-tab="dikemas">Dikemas</div>
             <div class="tab-item" data-tab="dikirim">Dikirim</div>
@@ -80,6 +81,25 @@ require_once 'fungsi.php';
                              <p>Total Pesanan: <strong style="font-size: 1.2rem; color: #2e8b57;"><?php echo format_price($pesanan['total_amount']); ?></strong></p>
                             <a href="bayar.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Bayar Sekarang</a>
                         </div>
+=======
+    <a href="pesanan.php" class="tab-item active">Belum Bayar</a>
+    <a href="dikemas.php" class="tab-item">Dikemas</a>
+    <a href="dikirim.php" class="tab-item">Dikirim</a>
+    <a href="beri_penilaian.php" class="tab-item">Beri Penilaian</a>
+    <a href="selesai.php" class="tab-item">Selesai</a>
+</div>
+        <div class="tab-content">
+            <div class="order-item">
+                <div class="order-header">
+                    <h4>Toko Batik Trusmi</h4>
+                    <p style="color: #d9534f; font-weight: bold;">Menunggu Pembayaran</p>
+                </div>
+                <div class="order-product">
+                    <img src="https://dynamic.zacdn.com/CAqpEXN0152sEQHTIO3s3RVPYCE=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/arjuna-weda-6040-2520944-3.jpg" alt="Produk">
+                    <div>
+                        <h4>Kemeja Batik Mega Mendung</h4>
+                        <p>1 x Rp150.000</p>
+>>>>>>> ceacfe38b8eb1b032b23cc81903b93c9dc0bfb65
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -146,3 +166,4 @@ require_once 'fungsi.php';
     </script>
 </body>
 </html>
+ 
