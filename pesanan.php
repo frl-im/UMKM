@@ -42,12 +42,12 @@
             <h2>Pesanan Saya</h2>
         </div>
         <div class="tabs">
-            <div class="tab-item active">Belum Bayar</div>
-            <div class="tab-item">Dikemas</div>
-            <div class="tab-item">Dikirim</div>
-            <div class="tab-item">Beri Penilaian</div>
-            <div class="tab-item">Selesai</div>
-        </div>
+    <a href="pesanan.php" class="tab-item active">Belum Bayar</a>
+    <a href="dikemas.php" class="tab-item">Dikemas</a>
+    <a href="dikirim.php" class="tab-item">Dikirim</a>
+    <a href="beri_penilaian.php" class="tab-item">Beri Penilaian</a>
+    <a href="selesai.php" class="tab-item">Selesai</a>
+</div>
         <div class="tab-content">
             <div class="order-item">
                 <div class="order-header">
@@ -73,3 +73,4 @@
     </footer>
 </body>
 </html>
+ 
