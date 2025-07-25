@@ -9,16 +9,14 @@ if(!$koneksi) {
     echo "Koneksi Berhasil!!!";
 }
 
-// Cek apakah user sudah login tanpa redirect paksa
+// Cek status login
 $is_logged_in = is_logged_in();
+$user_role = $_SESSION['user_role'] ?? null;
+$user_name = $_SESSION['user_name'] ?? 'User';
 
-// TAMBAHAN: Deteksi role user jika sudah login
-$user_role = null;
-$user_name = null;
-if ($is_logged_in) {
-    $user_role = $_SESSION['user_role'] ?? null;
-    $user_name = $_SESSION['user_name'] ?? 'User';
-}
+// Ambil semua produk dari database untuk ditampilkan
+$products = ambil_semua_produk();
+
 ?>
 
 <!DOCTYPE html>
@@ -493,7 +491,7 @@ if ($is_logged_in) {
                 <a href="profilpenjual.php"><i class="fas fa-store"></i> Dashboard Penjual</a>
                 <a href="upload_produk.php"><i class="fas fa-plus"></i> Tambah Produk</a>
               <?php else: ?>
-                <a href="profil-pembeli.php"><i class="fas fa-user"></i> Profil Saya</a>
+                <a href="profilpembeli.php"><i class="fas fa-user"></i> Profil Saya</a>
                 <a href="pesanan.php"><i class="fas fa-shopping-bag"></i> Pesanan Saya</a>
               <?php endif; ?>
               
@@ -502,7 +500,7 @@ if ($is_logged_in) {
           </div>
         <?php else: ?>
           <!-- PERBAIKAN: User belum login - tampilkan link login -->
-          <a href="login.php" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+          <a href="login.html" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
         <?php endif; ?>
         
         <a href="keranjang.php" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
@@ -576,65 +574,33 @@ if ($is_logged_in) {
       </div>
     </section>
 
-    <section class="recommendations">
-      <div class="container">
-        <div class="section-header"><i class="fas fa-star"></i> Rekomendasi</div>
-        <div class="product-grid">
-          <a href="detailproduk.html?id=1" class="product-card">
-            <div class="product-badge">-18%</div>
+   <section class="recommendations">
+  <div class="container">
+    <div class="section-header"><i class="fas fa-star"></i> Rekomendasi</div>
+    <div class="product-grid">
+
+      <?php if (empty($products)): ?>
+        <p style="grid-column: 1 / -1; text-align: center;">Belum ada produk yang tersedia saat ini.</p>
+      <?php else: ?>
+        <?php foreach ($products as $product): ?>
+          <a href="detailproduk.php?id=<?php echo $product['id']; ?>" class="product-card">
             <div class="product-image">
-              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQ8U7Ot2FSz5Son55HTXIicFEQxZ79FebVg&s" alt="Batik Modern Dress" />
+              <img src="<?php echo safe_output($product['image_url']); ?>" alt="<?php echo safe_output($product['name']); ?>" />
             </div>
             <div class="product-info">
-              <h4>Dress Batik Modern Kawung Premium</h4>
+              <h4><?php echo safe_output($product['name']); ?></h4>
               <div class="product-price">
-                <span class="current-price">Rp 450.000</span>
-                <span class="original-price">Rp 550.000</span>
+                <span class="current-price"><?php echo format_price($product['price']); ?></span>
               </div>
-              <p class="product-origin">Yogyakarta</p>
+              <p class="product-origin">Stok: <?php echo $product['stock']; ?></p> 
             </div>
           </a>
-          <a href="detailproduk.html" class="product-card">
-            <div class="product-image">
-              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYGKVxogGeN9A_RCeY5XkhNPZSLyQB1-FbJw&s" alt="Rendang" />
-            </div>
-            <div class="product-info">
-              <h4>Rendang Instant Premium Asli Padang</h4>
-              <div class="product-price">
-                <span class="current-price">Rp 85.000</span>
-              </div>
-              <p class="product-origin">Sumatera Barat</p>
-            </div>
-          </a>
-          <a href="detailproduk.html" class="product-card">
-            <div class="product-image">
-              <img src="https://filebroker-cdn.lazada.co.id/kf/Sa164a4185c394912aa33b56f69e14fe3N.jpg" alt="Ukiran Kayu" />
-            </div>
-            <div class="product-info">
-              <h4>Ukiran Kayu Jati Motif Garuda</h4>
-              <div class="product-price">
-                <span class="current-price">Rp 1.250.000</span>
-              </div>
-              <p class="product-origin">Jepara</p>
-            </div>
-          </a>
-          <a href="detailproduk.html" class="product-card">
-            <div class="product-badge">-25%</div>
-            <div class="product-image">
-              <img src="https://img.lazcdn.com/g/ff/kf/S4890465c83fb4ae9ae97e583596b4ffaY.jpg_360x360q80.jpg_.webp" alt="Kerajinan" />
-            </div>
-            <div class="product-info">
-              <h4>Tas Tenun Tradisional Flores</h4>
-              <div class="product-price">
-                <span class="current-price">Rp 225.000</span>
-                <span class="original-price">Rp 300.000</span>
-              </div>
-              <p class="product-origin">Nusa Tenggara Timur</p>
-            </div>
-          </a>
-        </div>
-      </div>
-    </section>
+        <?php endforeach; ?>
+      <?php endif; ?>
+
+    </div>
+  </div>
+</section>
   </main>
   
   <footer class="footer">

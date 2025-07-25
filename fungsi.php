@@ -235,4 +235,205 @@ function debug_session_status() {
     }
     error_log("===================");
 }
+// GANTI FUNGSI LAMA DENGAN VERSI DEBUG INI
+function ambil_pesanan_by_status($status) {
+    global $koneksi;
+    
+    // ================== ALAT DETEKSI DIMULAI ==================
+    echo "<div style='background: #111; color: #00ff00; padding: 15px; font-family: monospace; z-index: 9999; position: relative;'>";
+    echo "<h3>-- DEBUG MODE AKTIF --</h3>";
+
+    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'pembeli') {
+        echo "<strong>ERROR:</strong> Tidak ada sesi login pembeli yang valid.<br>";
+        echo "</div>";
+        return [];
+    }
+    
+    $user_id = (int)$_SESSION['user_id'];
+    $status_aman = mysqli_real_escape_string($koneksi, $status);
+
+    // Menampilkan user ID yang sedang login
+    echo "<strong>INFO:</strong> Mencari pesanan untuk User ID: <strong>$user_id</strong> dengan status '<strong>$status_aman</strong>'.<br>";
+
+    $query = "SELECT 
+                o.id AS order_id, o.total_amount, o.status,
+                oi.quantity, oi.price AS price_per_item,
+                p.name AS product_name, p.image_url AS product_image_path,
+                s.store_name
+              FROM orders AS o
+              JOIN order_items AS oi ON o.id = oi.order_id
+              JOIN products AS p ON oi.product_id = p.id
+              JOIN users AS s ON oi.seller_id = s.id
+              WHERE o.user_id = $user_id AND o.status = '$status_aman'";
+    
+    echo "<hr><strong>QUERY SQL:</strong><br><pre>$query</pre>";
+              
+    $hasil = mysqli_query($koneksi, $query);
+    
+    // Menampilkan jika ada error dari MySQL
+    if (!$hasil) {
+        echo "<strong>SQL ERROR:</strong> <span style='color: #ff0000;'>" . mysqli_error($koneksi) . "</span><br>";
+        echo "</div>";
+        return [];
+    }
+    
+    // Menampilkan jumlah data yang ditemukan
+    $jumlah_baris = mysqli_num_rows($hasil);
+    echo "<strong>HASIL:</strong> Ditemukan <strong>$jumlah_baris</strong> baris data.<br>";
+    echo "</div>";
+    // =================== ALAT DETEKSI SELESAI ===================
+    
+    $pesanan = [];
+    while ($baris = mysqli_fetch_assoc($hasil)) {
+        $pesanan[] = $baris;
+    }
+    
+    return $pesanan;
+}
+
+// FUNGSI BARU: Mengambil semua produk untuk ditampilkan di beranda
+function ambil_semua_produk() {
+    global $koneksi;
+    $query = "SELECT * FROM products WHERE status = 'active' AND stock > 0 ORDER BY created_at DESC";
+    $result = mysqli_query($koneksi, $query);
+    $products = [];
+    while($row = mysqli_fetch_assoc($result)) {
+        $products[] = $row;
+    }
+    return $products;
+}
+
+// FUNGSI BARU: Mengambil satu produk berdasarkan ID untuk halaman detail
+function ambil_produk_by_id($product_id) {
+    global $koneksi;
+    $id = (int)$product_id;
+    
+    $stmt = mysqli_prepare($koneksi, 
+        "SELECT p.*, u.store_name 
+         FROM products p 
+         JOIN users u ON p.seller_id = u.id 
+         WHERE p.id = ? AND p.status = 'active'");
+    
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    
+    return mysqli_fetch_assoc($result);
+}
+
+// FUNGSI BARU: Menambah produk ke keranjang
+function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $pid = (int)$product_id;
+    $qty = (int)$quantity;
+
+    // Cek apakah produk sudah ada di keranjang user
+    $stmt_check = mysqli_prepare($koneksi, "SELECT * FROM cart WHERE user_id = ? AND product_id = ?");
+    mysqli_stmt_bind_param($stmt_check, "ii", $uid, $pid);
+    mysqli_stmt_execute($stmt_check);
+    $result_check = mysqli_stmt_get_result($stmt_check);
+
+    if (mysqli_num_rows($result_check) > 0) {
+        // Jika sudah ada, update quantity
+        $stmt_update = mysqli_prepare($koneksi, "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?");
+        mysqli_stmt_bind_param($stmt_update, "iii", $qty, $uid, $pid);
+        mysqli_stmt_execute($stmt_update);
+    } else {
+        // Jika belum ada, insert baru
+        $stmt_insert = mysqli_prepare($koneksi, "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
+        mysqli_stmt_bind_param($stmt_insert, "iii", $uid, $pid);
+        mysqli_stmt_execute($stmt_insert);
+    }
+
+    return ['status' => 'success', 'message' => 'Produk berhasil ditambahkan ke keranjang!'];
+}
+
+// FUNGSI BARU: Membuat pesanan dari keranjang
+function buat_pesanan_dari_keranjang($user_id, $payment_method, $shipping_address) {
+    global $koneksi;
+    $uid = (int)$user_id;
+
+    // Mulai transaksi
+    mysqli_begin_transaction($koneksi);
+
+    try {
+        // 1. Ambil semua item dari keranjang user
+        $cart_query = mysqli_prepare($koneksi, "SELECT c.*, p.price, p.seller_id FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ?");
+        mysqli_stmt_bind_param($cart_query, "i", $uid);
+        mysqli_stmt_execute($cart_query);
+        $cart_items = mysqli_stmt_get_result($cart_query)->fetch_all(MYSQLI_ASSOC);
+
+        if (empty($cart_items)) {
+            throw new Exception("Keranjang kosong.");
+        }
+
+        // 2. Hitung total harga
+        $total_amount = 0;
+        foreach ($cart_items as $item) {
+            $total_amount += $item['price'] * $item['quantity'];
+        }
+
+        // 3. Buat pesanan di tabel 'orders'
+        $order_stmt = mysqli_prepare($koneksi, "INSERT INTO orders (user_id, total_amount, status, payment_method, shipping_address) VALUES (?, ?, 'pending', ?, ?)");
+        mysqli_stmt_bind_param($order_stmt, "idss", $uid, $total_amount, $payment_method, $shipping_address);
+        mysqli_stmt_execute($order_stmt);
+        $order_id = mysqli_insert_id($koneksi);
+
+        // 4. Pindahkan item dari keranjang ke 'order_items'
+        $order_item_stmt = mysqli_prepare($koneksi, "INSERT INTO order_items (order_id, product_id, seller_id, quantity, price) VALUES (?, ?, ?, ?, ?)");
+        foreach ($cart_items as $item) {
+            mysqli_stmt_bind_param($order_item_stmt, "iiiid", $order_id, $item['product_id'], $item['seller_id'], $item['quantity'], $item['price']);
+            mysqli_stmt_execute($order_item_stmt);
+            
+            // 5. Kurangi stok produk
+            $stock_stmt = mysqli_prepare($koneksi, "UPDATE products SET stock = stock - ? WHERE id = ?");
+            mysqli_stmt_bind_param($stock_stmt, "ii", $item['quantity'], $item['product_id']);
+            mysqli_stmt_execute($stock_stmt);
+        }
+        
+        // 6. Kosongkan keranjang
+        $clear_cart_stmt = mysqli_prepare($koneksi, "DELETE FROM cart WHERE user_id = ?");
+        mysqli_stmt_bind_param($clear_cart_stmt, "i", $uid);
+        mysqli_stmt_execute($clear_cart_stmt);
+
+        // Jika semua berhasil, commit transaksi
+        mysqli_commit($koneksi);
+        return ['status' => 'success', 'order_id' => $order_id];
+
+    } catch (Exception $e) {
+        // Jika ada error, batalkan semua perubahan
+        mysqli_rollback($koneksi);
+        return ['status' => 'error', 'message' => $e->getMessage()];
+    }
+}
+
+// TAMBAHKAN FUNGSI BARU INI DI FILE fungsi.php
+function ambil_daftar_percakapan($user_id, $user_role) {
+    global $koneksi;
+    $uid = (int)$user_id;
+
+    $query = "";
+    if ($user_role === 'pembeli') {
+        // Jika pembeli, tampilkan semua penjual dan admin (CS)
+        $query = "SELECT id, fullname, role, store_name FROM users WHERE role = 'penjual' OR role = 'admin'";
+    } elseif ($user_role === 'penjual') {
+        // Jika penjual, tampilkan hanya pembeli yang pernah mengirim pesan kepadanya
+        $query = "
+            SELECT DISTINCT u.id, u.fullname, u.role, u.store_name
+            FROM users u
+            JOIN messages m ON u.id = m.sender_id
+            WHERE m.receiver_id = $uid AND u.role = 'pembeli'
+        ";
+    }
+
+    if (empty($query)) {
+        return [];
+    }
+    
+    $result = mysqli_query($koneksi, $query);
+    if (!$result) return [];
+
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
 ?>
