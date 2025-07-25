@@ -1,4 +1,25 @@
 <?php
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+if ($_POST['action'] == 'login') {
+    // ... proses login ...
+    // Jika login sukses:
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['user_role'] = $user['role'];
+    $_SESSION['user_name'] = $user['fullname'];
+    $_SESSION['user_email'] = $user['email'];
+    $_SESSION['login_time'] = time();
+    $_SESSION['last_activity'] = time();
+    header("Location: dashboard.php");
+    exit();
+}
+if ($_POST['action'] == 'logout') {
+    session_unset();
+    session_destroy();
+    header("Location: login.php?status=logged_out");
+    exit();
+}
 // authlogic.php - DIPERBAIKI
 // Konfigurasi session yang benar
 ini_set('session.cookie_httponly', 1);

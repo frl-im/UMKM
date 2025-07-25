@@ -1,14 +1,20 @@
 <?php
-require 'fungsi.php';
+require_once 'fungsi.php';
 
 if (isset($_POST["register"])) {
-    if (register_penjual($_POST) > 0) {
+    // Panggil fungsi register_penjual dari fungsi.php
+    $result = register_penjual($_POST);
+    
+    // Perbaiki logika untuk menangani nilai return -1 (email duplikat)
+    if ($result > 0) {
         echo "<script>
                 alert('Registrasi toko berhasil! Silakan login.');
                 window.location.href='loginpenjual.php';
               </script>";
+    } else if ($result === -1) {
+        echo "<script>alert('Registrasi gagal! Email ini sudah terdaftar.');</script>";
     } else {
-        echo "<script>alert('Registrasi gagal! Email mungkin sudah terdaftar.');</script>";
+        echo "<script>alert('Registrasi gagal! Terjadi kesalahan.');</script>";
     }
 }
 ?>

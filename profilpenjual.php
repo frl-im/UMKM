@@ -1,88 +1,37 @@
 <?php
-// profilpenjual.php - DIPERBAIKI
-// Konfigurasi session yang benar (sama dengan authlogic.php)
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 0);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_lifetime', 0);
-ini_set('session.gc_maxlifetime', 7200);
-ini_set('session.name', 'KREASI_SESSION');
-
-// Mulai session dengan aman
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 require_once 'fungsi.php';
 
-// Fungsi untuk debug session (hapus setelah selesai)
-function debug_session_info() {
-    echo "<div style='background:#fff3cd;border:1px solid #ffeaa7;padding:10px;margin:10px 0;border-radius:5px;'>";
-    echo "<h3>🔍 DEBUG SESSION INFO:</h3>";
-    echo "<strong>Session Status:</strong> " . session_status();
-    
-    $status_text = [
-        PHP_SESSION_DISABLED => ' (DISABLED)',
-        PHP_SESSION_NONE => ' (NONE)', 
-        PHP_SESSION_ACTIVE => ' (ACTIVE)'
-    ];
-    echo $status_text[session_status()] ?? ' (UNKNOWN)';
-    echo "<br>";
-    
-    echo "<strong>Session ID:</strong> " . (session_id() ?: 'NOT SET') . "<br>";
-    echo "<strong>User ID:</strong> " . ($_SESSION['user_id'] ?? 'NOT SET') . "<br>";
-    echo "<strong>User Role:</strong> " . ($_SESSION['user_role'] ?? 'NOT SET') . "<br>";
-    echo "<strong>User Name:</strong> " . ($_SESSION['user_name'] ?? 'NOT SET') . "<br>";
-    echo "<strong>Email:</strong> " . ($_SESSION['user_email'] ?? 'NOT SET') . "<br>";
-    echo "<strong>Store Name:</strong> " . ($_SESSION['store_name'] ?? 'NOT SET') . "<br>";
-    echo "<strong>Login Time:</strong> " . (isset($_SESSION['login_time']) ? date('Y-m-d H:i:s', $_SESSION['login_time']) : 'NOT SET') . "<br>";
-    echo "<strong>Last Activity:</strong> " . (isset($_SESSION['last_activity']) ? date('Y-m-d H:i:s', $_SESSION['last_activity']) : 'NOT SET') . "<br>";
-    echo "<strong>Current Time:</strong> " . time() . " (" . date('Y-m-d H:i:s') . ")<br>";
-    
-    if (isset($_SESSION['login_time'])) {
-        $time_diff = time() - $_SESSION['login_time'];
-        echo "<strong>Session Duration:</strong> " . gmdate('H:i:s', $time_diff) . " (" . $time_diff . " seconds)<br>";
-    }
-    
-    echo "</div>";
-}
+// PERBAIKAN: Mulai session dan cek login dengan benar
+start_secure_session();
 
-// Tampilkan debug info
-debug_session_info();
-
-// Cek apakah user sudah login
+// PERBAIKAN: Fungsi check_login_status yang disederhanakan
 function check_login_status() {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['login_time'])) {
         return false;
     }
     
-    // Cek session timeout (2 jam)
+    // Cek session timeout (2 jam - konsisten dengan fungsi.php)
     if (time() - $_SESSION['login_time'] > 7200) {
         return false;
     }
     
-    // Update last activity
+    // PERBAIKAN: SELALU update last_activity
     $_SESSION['last_activity'] = time();
     return true;
 }
 
-// Cek login dan role
+// HAPUS DEBUG INFO - Ini bisa mengganggu session
+// debug_session_info(); // COMMENT OUT INI
+
+// Cek login dan role - PERBAIKAN: Sederhanakan
 if (!check_login_status()) {
-    echo "<div style='background:#f8d7da;color:#721c24;padding:10px;margin:10px 0;border-radius:5px;'>";
-    echo "❌ Session tidak valid atau sudah timeout. Redirecting...";
-    echo "</div>";
-    
-    // Redirect setelah 3 detik
-    echo "<script>setTimeout(function(){ window.location.href = 'loginpenjual.php?error=session_expired'; }, 3000);</script>";
+    // Redirect langsung tanpa delay
+    header("Location: loginpenjual.php?error=session_expired");
     exit();
 }
 
 if ($_SESSION['user_role'] !== 'penjual') {
-    echo "<div style='background:#f8d7da;color:#721c24;padding:10px;margin:10px 0;border-radius:5px;'>";
-    echo "❌ Akses ditolak. Hanya penjual yang dapat mengakses halaman ini.";
-    echo "</div>";
-    
-    echo "<script>setTimeout(function(){ window.location.href = 'login.php'; }, 3000);</script>";
+    header("Location: login.php");
     exit();
 }
 
@@ -91,12 +40,8 @@ $user_data = get_user_by_id($_SESSION['user_id']);
 
 // Jika data user tidak ditemukan
 if (!$user_data) {
-    echo "<div style='background:#f8d7da;color:#721c24;padding:10px;margin:10px 0;border-radius:5px;'>";
-    echo "❌ Data user tidak ditemukan. Redirecting...";
-    echo "</div>";
-    
     logout_user();
-    echo "<script>setTimeout(function(){ window.location.href = 'loginpenjual.php?error=user_not_found'; }, 3000);</script>";
+    header("Location: loginpenjual.php?error=user_not_found");
     exit();
 }
 
@@ -229,15 +174,18 @@ if (isset($user_data['verification_status']) && $_SESSION['verification_status']
 </head>
 <body>
     <div class="header">
-        <div>
-            <h2><i class="fas fa-store"></i> Dashboard Penjual</h2>
-        </div>
-        <div class="nav-links">
-            <span>Hai, <?php echo safe_output($_SESSION['user_name']); ?>!</span>
-            <a href="upload_produk.php"><i class="fas fa-plus"></i> Tambah Produk</a>
-            <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </div>
+    <div>
+        <h2><i class="fas fa-store"></i> Dashboard Penjual</h2>
     </div>
+    <div class="nav-links">
+        <span>Hai, <?php echo safe_output($_SESSION['user_name']); ?>!</span>
+        
+        <a href="index.php"><i class="fas fa-home"></i> Beranda</a>
+        
+        <a href="upload_produk.php"><i class="fas fa-plus"></i> Tambah Produk</a>
+        <a href="logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</div>
 
     <div class="main-content">
         <div class="welcome-card">
@@ -273,15 +221,15 @@ if (isset($user_data['verification_status']) && $_SESSION['verification_status']
             <?php if($verification_status < 3): ?>
                 <div class="action-buttons">
                     <?php if($verification_status == 0): ?>
-                        <a href="verifikasi_data.php" class="btn btn-primary">
+                        <a href="verifikasi-data-diri.php" class="btn btn-primary">
                             <i class="fas fa-id-card"></i> Verifikasi Data Diri
                         </a>
                     <?php elseif($verification_status == 1): ?>
-                        <a href="informasi_toko.php" class="btn btn-primary">
+                        <a href="informasitoko.php" class="btn btn-primary">
                             <i class="fas fa-store"></i> Lengkapi Info Toko
                         </a>
                     <?php elseif($verification_status == 2): ?>
-                        <a href="upload_produk.php" class="btn btn-success">
+                        <a href="uploadproduk.php" class="btn btn-success">
                             <i class="fas fa-box"></i> Upload Produk Pertama
                         </a>
                     <?php endif; ?>

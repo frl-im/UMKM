@@ -1,21 +1,24 @@
 <?php
+require_once 'fungsi.php';
 
-   $koneksi = mysqli_connect("localhost:3306","root","","Kreasidb");
+$koneksi = mysqli_connect("localhost:3306","root","","Kreasidb");
 
-   if(!$koneksi)
-   {
-        die("Koneksi Gagal!".mysqli_connect_error());
-   }
-   else
-   {
-        echo "Koneksi Berhasil!!!";
-   }
-
-   require_once 'fungsi.php';
+if(!$koneksi) {
+    die("Koneksi Gagal!".mysqli_connect_error());
+} else {
+    echo "Koneksi Berhasil!!!";
+}
 
 // Cek apakah user sudah login tanpa redirect paksa
 $is_logged_in = is_logged_in();
 
+// TAMBAHAN: Deteksi role user jika sudah login
+$user_role = null;
+$user_name = null;
+if ($is_logged_in) {
+    $user_role = $_SESSION['user_role'] ?? null;
+    $user_name = $_SESSION['user_name'] ?? 'User';
+}
 ?>
 
 <!DOCTYPE html>
@@ -25,6 +28,7 @@ $is_logged_in = is_logged_in();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KreasiLokal.id - Tradisi Bertemu Inovasi</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- SEMUA CSS TETAP SAMA - TIDAK PERLU DIUBAH -->
   <style>
     /* Reset CSS & Font Dasar */
     * {
@@ -120,8 +124,50 @@ $is_logged_in = is_logged_in();
     .nav-icons a:hover {
       color: #2e8b57;
     }
+
+    /* TAMBAHAN: Style untuk user dropdown */
+    .user-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .user-dropdown-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: white;
+      min-width: 200px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      border-radius: 5px;
+      z-index: 1;
+      padding: 10px 0;
+    }
+
+    .user-dropdown:hover .user-dropdown-content {
+      display: block;
+    }
+
+    .user-dropdown-content a {
+      color: #333;
+      padding: 10px 16px;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .user-dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+
+    .user-info {
+      padding: 10px 16px;
+      border-bottom: 1px solid #eee;
+      color: #2e8b57;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
     
-    /* Banner & Navigation */
+    /* SEMUA CSS LAINNYA TETAP SAMA... */
     .promo-banner-container { 
       padding: 20px 0; 
       background-color: white; 
@@ -429,19 +475,42 @@ $is_logged_in = is_logged_in();
   <header class="navbar">
     <div class="container">
       <div class="logo">
-        <a href="index.html"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
+        <a href="index.php"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
       </div>
       <div class="main-search-bar">
         <input type="text" placeholder="Cari batik, rendang, atau ukiran...">
         <button><i class="fas fa-search"></i></button>
       </div>
       <div class="nav-icons">
-        <a href="login.php" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+        <?php if ($is_logged_in): ?>
+          <!-- PERBAIKAN: User sudah login - tampilkan dropdown -->
+          <div class="user-dropdown">
+            <a href="#" title="Profil User"><i class="fas fa-user-circle"></i></a>
+            <div class="user-dropdown-content">
+              <div class="user-info">Hai, <?php echo htmlspecialchars($user_name); ?>!</div>
+              
+              <?php if ($user_role === 'penjual'): ?>
+                <a href="profilpenjual.php"><i class="fas fa-store"></i> Dashboard Penjual</a>
+                <a href="upload_produk.php"><i class="fas fa-plus"></i> Tambah Produk</a>
+              <?php else: ?>
+                <a href="profil-pembeli.php"><i class="fas fa-user"></i> Profil Saya</a>
+                <a href="pesanan.php"><i class="fas fa-shopping-bag"></i> Pesanan Saya</a>
+              <?php endif; ?>
+              
+              <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+          </div>
+        <?php else: ?>
+          <!-- PERBAIKAN: User belum login - tampilkan link login -->
+          <a href="login.php" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
+        <?php endif; ?>
+        
         <a href="keranjang.php" title="Keranjang Belanja"><i class="fas fa-shopping-cart"></i></a>
       </div>
     </div>
   </header>
 
+  <!-- SEMUA KONTEN LAINNYA TETAP SAMA -->
   <main>
     <section class="promo-banner-container">
       <div class="container">

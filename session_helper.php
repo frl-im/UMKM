@@ -1,6 +1,7 @@
 <?php
-// session_helper.php - VERSI PERBAIKAN
-// File ini harus di-include di setiap halaman yang memerlukan session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once 'fungsi.php';
 
