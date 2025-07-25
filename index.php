@@ -514,7 +514,7 @@ if ($is_logged_in) {
   <main>
     <section class="promo-banner-container">
       <div class="container">
-        <img src="https://via.placeholder.com/1170x350/2e8b57/ffffff?text=Promo+Spesial+Produk+Lokal" alt="Promo Utama">
+        <img src="https://telusurkultur.com/cdn/shop/articles/Cover_Blog_Dienvibi_8_f9c3ba6f-4e3f-469f-a33a-847c7e5790c8.png?v=1698590458" alt="Promo Utama">
       </div>
     </section>
 
@@ -560,7 +560,7 @@ if ($is_logged_in) {
           <a href="detailproduk.html" class="product-card">
             <div class="product-badge">-53%</div>
             <div class="product-image">
-              <img src="https://via.placeholder.com/300x300/654321/ffffff?text=Lampu+Anyaman" alt="Lampu Anyaman" />
+              <img src="https://ae01.alicdn.com/kf/S08f1983f38664f439ab601023a03df77c.jpg_640x640q90.jpg" alt="Lampu Anyaman" />
             </div>
             <div class="product-info">
               <h4>Lampu Gantung Anyaman Bambu Handmade</h4>
@@ -583,7 +583,7 @@ if ($is_logged_in) {
           <a href="detailproduk.html?id=1" class="product-card">
             <div class="product-badge">-18%</div>
             <div class="product-image">
-              <img src="https://via.placeholder.com/300x300/2e8b57/ffffff?text=Batik+Modern" alt="Batik Modern Dress" />
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdQ8U7Ot2FSz5Son55HTXIicFEQxZ79FebVg&s" alt="Batik Modern Dress" />
             </div>
             <div class="product-info">
               <h4>Dress Batik Modern Kawung Premium</h4>
@@ -596,7 +596,7 @@ if ($is_logged_in) {
           </a>
           <a href="detailproduk.html" class="product-card">
             <div class="product-image">
-              <img src="https://via.placeholder.com/300x300/ff8c00/ffffff?text=Rendang+Instant" alt="Rendang" />
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYGKVxogGeN9A_RCeY5XkhNPZSLyQB1-FbJw&s" alt="Rendang" />
             </div>
             <div class="product-info">
               <h4>Rendang Instant Premium Asli Padang</h4>
@@ -608,7 +608,7 @@ if ($is_logged_in) {
           </a>
           <a href="detailproduk.html" class="product-card">
             <div class="product-image">
-              <img src="https://via.placeholder.com/300x300/8b4513/ffffff?text=Ukiran+Kayu" alt="Ukiran Kayu" />
+              <img src="https://filebroker-cdn.lazada.co.id/kf/Sa164a4185c394912aa33b56f69e14fe3N.jpg" alt="Ukiran Kayu" />
             </div>
             <div class="product-info">
               <h4>Ukiran Kayu Jati Motif Garuda</h4>
@@ -621,7 +621,7 @@ if ($is_logged_in) {
           <a href="detailproduk.html" class="product-card">
             <div class="product-badge">-25%</div>
             <div class="product-image">
-              <img src="https://via.placeholder.com/300x300/dc143c/ffffff?text=Kerajinan+Tangan" alt="Kerajinan" />
+              <img src="https://img.lazcdn.com/g/ff/kf/S4890465c83fb4ae9ae97e583596b4ffaY.jpg_360x360q80.jpg_.webp" alt="Kerajinan" />
             </div>
             <div class="product-info">
               <h4>Tas Tenun Tradisional Flores</h4>

@@ -1,11 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
-// Data dummy (simulasi database)
-let produk = [
-  { id: 1, nama: "Batik Tulis", harga: 150000 },
-  { id: 2, nama: "Keripik Tempe", harga: 25000 }
-];
+let produk = require("./produkData"); // ambil dari produkData.js
 
 // Ambil semua produk
 router.get("/", (req, res) => {
@@ -29,4 +24,3 @@ router.delete("/:id", (req, res) => {
 });
 
 module.exports = router;
-
