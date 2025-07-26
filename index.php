@@ -615,7 +615,7 @@ $products = ambil_semua_produk();
         <div class="footer-section">
           <h3><i class="fas fa-link"></i> Tautan Cepat</h3>
           <ul>
-            <li><a href="tentang.html">Tentang Kami</a></li>
+            <li><a href="about.html">Tentang Kami</a></li>
             <li><a href="kontak.html">Hubungi Kami</a></li>
             <li><a href="bantuan.html">Pusat Bantuan</a></li>
             <li><a href="syarat.html">Syarat & Ketentuan</a></li>
