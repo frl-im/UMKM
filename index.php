@@ -640,7 +640,7 @@ $products = ambil_semua_produk();
           <h3><i class="fas fa-envelope"></i> Kontak & Dukungan</h3>
           <p><i class="fas fa-phone"></i> +62 812-3456-7890</p>
           <p><i class="fas fa-envelope"></i> info@kreasilokal.id</p>
-          <p><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</p>
+          <p><i class="fas fa-map-marker-alt"></i> Kedungmundu, Kota Semarang, Indonesia</p>
           
           <div class="social-links">
             <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
