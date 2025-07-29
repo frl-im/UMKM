@@ -644,7 +644,7 @@ $products = ambil_semua_produk();
           
           <div class="social-links">
             <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/zuck?igsh=ZDg4dHF4YmlsM3M2" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
             <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
             <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
