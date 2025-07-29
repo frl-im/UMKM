@@ -1,5 +1,17 @@
 <?php
-require_once '../fungsi.php'; // Tambahkan ../ untuk keluar dari folder ajax
+// Memuat autoloader dari Composer dan library phpdotenv
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->load();
+
+// ... (sisa kode Anda selanjutnya)
+// Baris ini untuk menampilkan error PHP secara langsung, PENTING untuk debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Pastikan path ini benar, keluar satu folder untuk menemukan fungsi.php
+require_once '../fungsi.php'; 
 header('Content-Type: application/json');
 
 // Fungsi bantuan untuk response JSON
@@ -16,10 +28,10 @@ if (!isset($_SESSION['user_id'])) {
 
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $current_user_id = $_SESSION['user_id'];
-global $koneksi; // Membuat koneksi mysqli tersedia
+global $koneksi;
 
 switch ($action) {
-    // ==================== FUNGSI CHAT ====================
+    // ==================== FUNGSI CHAT (KODE LAMA ANDA) ====================
     case 'send_message':
         $receiver_id = (int)($_POST['receiver_id'] ?? 0);
         $message = trim($_POST['message'] ?? '');
@@ -28,7 +40,6 @@ switch ($action) {
             json_response('error', 'Pesan dan penerima tidak boleh kosong.');
         }
 
-        // Query INSERT yang benar sesuai dengan struktur tabel Anda
         $stmt = mysqli_prepare($koneksi, "INSERT INTO messages (sender_id, receiver_id, message, message_type, chat_type, is_read) VALUES (?, ?, ?, 'text', 'user', 0)");
         
         if ($stmt === false) {
@@ -40,7 +51,6 @@ switch ($action) {
         if (mysqli_stmt_execute($stmt)) {
             json_response('success', 'Pesan terkirim.');
         } else {
-            // Memberikan pesan error yang lebih spesifik dari database
             json_response('error', 'Gagal mengirim pesan: ' . mysqli_stmt_error($stmt));
         }
         mysqli_stmt_close($stmt);
@@ -52,12 +62,10 @@ switch ($action) {
             json_response('error', 'User tidak valid.');
         }
 
-        // Tandai pesan sebagai sudah dibaca
         $stmt_read = mysqli_prepare($koneksi, "UPDATE messages SET is_read = 1 WHERE sender_id = ? AND receiver_id = ?");
         mysqli_stmt_bind_param($stmt_read, "ii", $other_user_id, $current_user_id);
         mysqli_stmt_execute($stmt_read);
 
-        // Ambil percakapan
         $stmt_msg = mysqli_prepare($koneksi, "SELECT * FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?) ORDER BY created_at ASC");
         mysqli_stmt_bind_param($stmt_msg, "iiii", $current_user_id, $other_user_id, $other_user_id, $current_user_id);
         mysqli_stmt_execute($stmt_msg);
@@ -67,7 +75,7 @@ switch ($action) {
         json_response('success', 'Pesan diambil.', $messages);
         break;
 
-    // ==================== FUNGSI KERANJANG ====================
+    // ==================== FUNGSI KERANJANG (KODE LAMA ANDA) ====================
     case 'add_to_cart':
         $product_id = (int)($_POST['product_id'] ?? 0);
         
@@ -89,7 +97,6 @@ switch ($action) {
             mysqli_stmt_execute($stmt);
             json_response('success', 'Item dihapus dari keranjang.');
         } else {
-            // Cek stok
             $product = ambil_produk_by_id($product_id);
             if ($quantity > $product['stock']) {
                 json_response('error', 'Jumlah melebihi stok tersedia.');
@@ -109,7 +116,7 @@ switch ($action) {
         json_response('success', 'Item berhasil dihapus.');
         break;
         
-    // ==================== FUNGSI PESANAN ====================
+    // ==================== FUNGSI PESANAN & CHECKOUT (KODE LAMA ANDA + KODE BARU) ====================
     case 'create_order':
         $payment_method = $_POST['payment_method'] ?? '';
         $shipping_address = $_POST['shipping_address'] ?? '';
@@ -127,11 +134,7 @@ switch ($action) {
         }
         break;
 
-    default:
-        json_response('error', 'Aksi tidak valid.');
-        break;
-
-        case 'apply_voucher':
+    case 'apply_voucher':
         $voucher_code = $_POST['voucher_code'] ?? '';
         if(empty($voucher_code)) {
             json_response('error', 'Kode voucher tidak boleh kosong.');
@@ -139,13 +142,106 @@ switch ($action) {
 
         $voucher = apply_voucher($voucher_code);
         if ($voucher) {
-            // Simpan info voucher di session untuk digunakan saat checkout
             $_SESSION['applied_voucher'] = $voucher;
             json_response('success', 'Voucher berhasil diterapkan!', $voucher);
         } else {
-            unset($_SESSION['applied_voucher']); // Hapus jika ada voucher lama
+            unset($_SESSION['applied_voucher']);
             json_response('error', 'Voucher tidak valid atau sudah kedaluwarsa.');
         }
+        break;
+
+    case 'prepare_checkout':
+        $_SESSION['checkout_data'] = [
+            'user_id'           => $current_user_id,
+            'total_amount'      => (float)($_POST['total_amount'] ?? 0),
+            'shipping_cost'     => (float)($_POST['shipping_cost'] ?? 0),
+            'discount_amount'   => (float)($_POST['discount_amount'] ?? 0),
+            'shipping_address'  => $_POST['shipping_address'] ?? '',
+            'recipient_name'    => $_POST['recipient_name'] ?? '',
+            'items'             => ambil_isi_keranjang($current_user_id) 
+        ];
+
+        if (empty($_SESSION['checkout_data']['items'])) {
+            json_response('error', 'Keranjang Anda kosong.');
+        }
+        json_response('success', 'Data checkout siap.');
+        break;
+
+    // ==================== FUNGSI PEMBAYARAN MIDTRANS (KODE BARU YANG SUDAH DIPERBAIKI) ====================
+    case 'create_payment':
+
+        $checkoutData = $_SESSION['checkout_data'] ?? null;
+        if (!$checkoutData) {
+            json_response('error', 'Sesi checkout tidak ditemukan. Ulangi dari keranjang.');
+        }
+
+        // =======================================================================
+        // PERHATIAN: PASTIKAN ANDA MENGGANTI SERVER KEY DI BAWAH INI!
+        // INI ADALAH PENYEBAB PALING UMUM DARI ERROR "NOT VALID JSON"
+        // =======================================================================
+        \Midtrans\Config::$serverKey = $_ENV['MIDTRANS_SERVER_KEY'];
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $paymentType = $_POST['payment_type'];
+        $orderId = 'KREASI-' . time();
+        $totalAmount = (int) $checkoutData['total_amount'];
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => $totalAmount,
+            ],
+            'customer_details' => [
+                'first_name' => $_SESSION['user_name'] ?? 'Guest',
+                'email' => $_SESSION['user_email'] ?? 'guest@example.com',
+            ]
+        ];
+        
+        // Logika untuk VA Bank
+        if (strpos($paymentType, '_va') !== false) {
+             if ($paymentType === 'mandiri_va') {
+                 $params['payment_type'] = 'echannel';
+                 $params['echannel'] = ['bill_info1' => 'Pembayaran untuk:', 'bill_info2' => 'Order ' . $orderId];
+             } else {
+                 $params['payment_type'] = 'bank_transfer';
+                 $params['bank_transfer'] = ['bank' => str_replace('_va', '', $paymentType)];
+             }
+        } else {
+             $params['payment_type'] = $paymentType;
+        }
+        
+        if ($paymentType === 'shopeepay') {
+            $params['shopeepay'] = ['callback_url' => 'https://example.com/status?order_id=' . $orderId];
+        }
+        
+        try {
+            $stmt = mysqli_prepare($koneksi, "INSERT INTO orders (id, user_id, total_amount, status, created_at) VALUES (?, ?, ?, 'pending', NOW())");
+            mysqli_stmt_bind_param($stmt, "sid", $orderId, $current_user_id, $totalAmount);
+            mysqli_stmt_execute($stmt);
+
+            $chargeResponse = \Midtrans\CoreApi::charge($params);
+
+            $frontendData = [];
+            if ($chargeResponse->payment_type == 'qris') {
+                $frontendData = ['type' => 'qris', 'title' => 'Pembayaran via QRIS', 'qr_string' => $chargeResponse->qr_string, 'expiry_time' => date('d M Y H:i:s', strtotime($chargeResponse->expiry_time))];
+            } elseif (isset($chargeResponse->va_numbers)) {
+                $frontendData = ['type' => 'va', 'title' => 'Pembayaran ' . strtoupper($chargeResponse->va_numbers[0]->bank) . ' VA', 'va_number' => $chargeResponse->va_numbers[0]->va_number, 'total' => format_price($chargeResponse->gross_amount), 'expiry_time' => date('d M Y H:i:s', strtotime($chargeResponse->expiry_time))];
+            } elseif ($chargeResponse->payment_type == 'echannel') {
+                $frontendData = ['type' => 'va', 'title' => 'Pembayaran Mandiri Bill', 'va_number' => $chargeResponse->biller_code . ' ' . $chargeResponse->bill_key, 'total' => format_price($chargeResponse->gross_amount), 'expiry_time' => date('d M Y H:i:s', strtotime($chargeResponse->expiry_time))];
+            } elseif ($chargeResponse->payment_type == 'gopay' || $chargeResponse->payment_type == 'shopeepay') {
+                 $ewalletName = ($chargeResponse->payment_type == 'gopay') ? 'GoPay' : 'ShopeePay';
+                 $frontendData = ['type' => 'ewallet', 'name' => $ewalletName, 'title' => 'Pembayaran via ' . $ewalletName, 'deeplink_url' => $chargeResponse->actions[0]->url];
+            }
+            json_response('success', 'Detail pembayaran berhasil dibuat.', $frontendData);
+        } catch (Exception $e) {
+            json_response('error', 'Gagal memproses pembayaran: ' . $e->getMessage(), ['raw_error' => $e->__toString()]);
+        }
+        break;
+
+    default:
+        json_response('error', 'Aksi tidak valid.');
         break;
 }
 ?>

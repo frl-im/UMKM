@@ -1,12 +1,11 @@
 <?php
 require_once 'fungsi.php';
 
-$koneksi = mysqli_connect("localhost:3306","root","","Kreasidb");
+$koneksi = mysqli_connect("localhost", "root", "", "Kreasidb");
 
-if(!$koneksi) {
-    die("Koneksi Gagal!".mysqli_connect_error());
-} else {
-    echo "Koneksi Berhasil!!!";
+// Jika gagal, program berhenti dengan pesan error. Ini tidak masalah.
+if (!$koneksi) {
+    die("Koneksi ke database gagal: " . mysqli_connect_error());
 }
 
 // Cek status login
@@ -476,7 +475,7 @@ $products = ambil_semua_produk();
         <a href="index.php"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
       </div>
       <div class="main-search-bar">
-        <input type="text" placeholder="Cari batik, rendang, atau ukiran...">
+        <input type="text" id="search-input" placeholder="Cari batik, rendang, atau ukiran...">
         <button><i class="fas fa-search"></i></button>
       </div>
       <div class="nav-icons">
@@ -517,33 +516,33 @@ $products = ambil_semua_produk();
     </section>
 
     <section class="quick-nav-icons">
-      <div class="container">
-        <a href="voucher.html" class="quick-nav-item">
-          <i class="fas fa-tags"></i>
-          <span>Voucher</span>
-        </a>
-        <a href="flashsale.html" class="quick-nav-item">
-          <i class="fas fa-bolt"></i>
-          <span>Flash Sale</span>
-        </a>
-        <a href="tokopilihan.html" class="quick-nav-item">
-          <i class="fas fa-store"></i>
-          <span>Toko Pilihan</span>
-        </a>
-        <a href="mahasiswa.html" class="quick-nav-item">
-          <i class="fas fa-user-graduate"></i>
-          <span>Mahasiswa</span>
-        </a>
-        <a href="makanan.html" class="quick-nav-item">
-          <i class="fas fa-cookie-bite"></i>
-          <span>Kuliner</span>
-        </a>
-        <a href="kategori.html" class="quick-nav-item">
-          <i class="fas fa-th-large"></i>
-          <span>Kategori</span>
-        </a>
-      </div>
-    </section>
+  <div class="container">
+    <a href="voucher.php" class="quick-nav-item">
+      <i class="fas fa-tags"></i>
+      <span>Voucher</span>
+    </a>
+    <a href="flashsale.php" class="quick-nav-item">
+      <i class="fas fa-bolt"></i>
+      <span>Flash Sale</span>
+    </a>
+    <a href="tokopilihan.php" class="quick-nav-item">
+      <i class="fas fa-store"></i>
+      <span>Toko Pilihan</span>
+    </a>
+    <a href="kategori.php?nama=Inovasi Mahasiswa" class="quick-nav-item">
+      <i class="fas fa-user-graduate"></i>
+      <span>Mahasiswa</span>
+    </a>
+    <a href="kategori.php?nama=Kuliner Nusantara" class="quick-nav-item">
+      <i class="fas fa-cookie-bite"></i>
+      <span>Kuliner</span>
+    </a>
+    <a href="kategori.php" class="quick-nav-item">
+      <i class="fas fa-th-large"></i>
+      <span>Kategori</span>
+    </a>
+  </div>
+</section>
 
     <section class="flash-sale" id="flash-sale">
       <div class="container">
@@ -577,7 +576,7 @@ $products = ambil_semua_produk();
    <section class="recommendations">
   <div class="container">
     <div class="section-header"><i class="fas fa-star"></i> Rekomendasi</div>
-    <div class="product-grid">
+    <div class="product-grid" id="product-container">
 
       <?php if (empty($products)): ?>
         <p style="grid-column: 1 / -1; text-align: center;">Belum ada produk yang tersedia saat ini.</p>
@@ -625,16 +624,16 @@ $products = ambil_semua_produk();
         </div>
         
         <div class="footer-section">
-          <h3><i class="fas fa-shopping-bag"></i> Kategori Produk</h3>
-          <ul>
-            <li><a href="batik.html">Batik & Tekstil</a></li>
-            <li><a href="kerajinan.html">Kerajinan Tangan</a></li>
-            <li><a href="kuliner.html">Kuliner Nusantara</a></li>
-            <li><a href="furniture.html">Furniture Kayu</a></li>
-            <li><a href="aksesoris.html">Aksesoris Tradisional</a></li>
-            <li><a href="seni.html">Seni & Lukisan</a></li>
-          </ul>
-        </div>
+  <h3><i class="fas fa-shopping-bag"></i> Kategori Produk</h3>
+  <ul>
+    <li><a href="kategori.php?nama=Batik & Tekstil">Batik & Tekstil</a></li>
+    <li><a href="kategori.php?nama=Kerajinan Tangan">Kerajinan Tangan</a></li>
+    <li><a href="kategori.php?nama=Kuliner Nusantara">Kuliner Nusantara</a></li>
+    <li><a href="kategori.php?nama=Furniture Kayu">Furniture Kayu</a></li>
+    <li><a href="kategori.php?nama=Aksesoris Tradisional">Aksesoris Tradisional</a></li>
+    <li><a href="kategori.php?nama=Seni & Lukisan">Seni & Lukisan</a></li>
+  </ul>
+</div>
         
         <div class="footer-section">
           <h3><i class="fas fa-envelope"></i> Kontak & Dukungan</h3>
@@ -644,7 +643,7 @@ $products = ambil_semua_produk();
           
           <div class="social-links">
             <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.instagram.com/zuck?igsh=ZDg4dHF4YmlsM3M2" title="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
             <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a>
             <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
@@ -698,6 +697,75 @@ $products = ambil_semua_produk();
         }
       });
     });
+
+    function renderProducts(products) {
+    // Jika tidak ada produk, tampilkan pesan
+    if (products.length === 0) {
+        return `<p style="grid-column: 1 / -1; text-align: center;">Produk tidak ditemukan.</p>`;
+    }
+
+    let productHTML = '';
+    // Loop melalui setiap produk dan buat kartu HTML-nya
+    products.forEach(product => {
+        productHTML += `
+            <a href="detailproduk.php?id=${product.id}" class="product-card">
+                <div class="product-image">
+                    <img src="${product.image_url}" alt="${product.name}" />
+                </div>
+                <div class="product-info">
+                    <h4>${product.name}</h4>
+                    <div class="product-price">
+                        <span class="current-price">${product.formatted_price}</span>
+                    </div>
+                    <p class="product-origin">Stok: ${product.stock}</p> 
+                </div>
+            </a>
+        `;
+    });
+    return productHTML;
+}
+
+// Ambil elemen yang kita butuhkan dari halaman
+const searchInput = document.getElementById('search-input');
+const productContainer = document.getElementById('product-container');
+const originalProductsHTML = productContainer.innerHTML; // Simpan konten asli
+let debounceTimer;
+
+// Tambahkan event listener yang akan berjalan setiap kali pengguna mengetik
+searchInput.addEventListener('input', function() {
+    const keyword = this.value.trim();
+
+    // Hapus timer sebelumnya untuk "debouncing"
+    clearTimeout(debounceTimer);
+
+    // Jika input kosong, kembalikan ke daftar produk awal
+    if (keyword.length === 0) {
+        productContainer.innerHTML = originalProductsHTML;
+        return;
+    }
+
+    // Jangan cari jika kata kunci terlalu pendek
+    if (keyword.length < 2) {
+        return;
+    }
+
+    // Atur timer. Permintaan AJAX hanya akan dikirim setelah pengguna berhenti mengetik selama 300ms
+    // Ini mencegah request berlebihan ke server
+    debounceTimer = setTimeout(() => {
+        // Kirim request ke backend menggunakan Fetch API
+        fetch(`ajax_searchbar.php?q=${encodeURIComponent(keyword)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Tampilkan produk hasil pencarian
+                const newProductHTML = renderProducts(data);
+                productContainer.innerHTML = newProductHTML;
+            })
+            .catch(error => {
+                console.error('Error fetching search results:', error);
+                productContainer.innerHTML = `<p style="grid-column: 1 / -1; text-align: center;">Terjadi kesalahan saat mencari.</p>`;
+            });
+    }, 300);
+});
   </script>
 
 </body>

@@ -1,7 +1,6 @@
 <?php
 require_once 'fungsi.php';
 check_login('pembeli');
-
 $cartItems = ambil_isi_keranjang($_SESSION['user_id']);
 if (empty($cartItems)) {
     header('Location: keranjang.php');
@@ -493,8 +492,7 @@ $shippingOptions = [
 
     <main class="container">
         <div>
-            <form id="checkout-form" method="POST" action="proses_checkout.php">
-                <!-- Informasi Pembeli -->
+            <form id="checkout-form" method="POST">
                 <div class="card">
                     <h3><i class="fas fa-user"></i> Informasi Pembeli</h3>
                     <div class="user-info">
@@ -520,7 +518,6 @@ $shippingOptions = [
                     </div>
                 </div>
 
-                <!-- Alamat Pengiriman -->
                 <div class="card">
                     <h3><i class="fas fa-map-marker-alt"></i> Alamat Pengiriman</h3>
                     <div id="address-info" class="address-display">
@@ -529,17 +526,11 @@ $shippingOptions = [
                             <p><i class="fas fa-user"></i> <strong><?php echo safe_output($primaryAddress['recipient_name']); ?></strong></p>
                             <p><i class="fas fa-phone"></i> <?php echo safe_output($primaryAddress['phone']); ?></p>
                             <p><i class="fas fa-map-marker-alt"></i> <?php echo safe_output($primaryAddress['full_address']); ?></p>
-                            <?php if (!empty($primaryAddress['postal_code'])): ?>
-                            <p><i class="fas fa-mail-bulk"></i> Kode Pos: <?php echo safe_output($primaryAddress['postal_code']); ?></p>
-                            <?php endif; ?>
                             <input type="hidden" name="shipping_address" value="<?php echo safe_output($primaryAddress['full_address']); ?>">
                             <input type="hidden" name="recipient_name" value="<?php echo safe_output($primaryAddress['recipient_name']); ?>">
-                            <input type="hidden" name="recipient_phone" value="<?php echo safe_output($primaryAddress['phone']); ?>">
                         <?php else: ?>
                             <div style="text-align: center; padding: 2rem; color: #d9534f;">
-                                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                                 <h4>Alamat Pengiriman Belum Diatur</h4>
-                                <p>Anda perlu mengatur alamat pengiriman terlebih dahulu sebelum melanjutkan checkout.</p>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -548,16 +539,6 @@ $shippingOptions = [
                     </a>
                 </div>
 
-                <!-- Info Berat dan Ongkir -->
-                <div class="card">
-                    <div class="weight-info">
-                        <i class="fas fa-weight"></i> 
-                        <strong>Total Berat Pesanan: <?php echo number_format($totalWeight); ?> gram (<?php echo number_format($totalWeight/1000, 1); ?> kg)</strong>
-                        <br><small>Biaya pengiriman dihitung berdasarkan berat dan jarak pengiriman</small>
-                    </div>
-                </div>
-
-                <!-- Opsi Pengiriman -->
                 <div class="card">
                     <h3><i class="fas fa-truck"></i> Opsi Pengiriman</h3>
                     <div id="shipping-options">
@@ -589,9 +570,6 @@ $shippingOptions = [
                                 <div class="item-name"><?php echo safe_output($item['name']); ?></div>
                                 <div class="item-details">
                                     Qty: <?php echo $item['quantity']; ?> × <?php echo format_price($item['price']); ?>
-                                    <?php if (isset($item['weight'])): ?>
-                                        <br>Berat: <?php echo number_format(($item['weight'] ?? 100) * $item['quantity']); ?>g
-                                    <?php endif; ?>
                                 </div>
                             </div>
                             <div class="item-price"><?php echo format_price($item['price'] * $item['quantity']); ?></div>
@@ -602,100 +580,90 @@ $shippingOptions = [
                 <div class="voucher-section">
                     <label for="voucher_code"><i class="fas fa-ticket-alt"></i> <strong>Kode Voucher</strong></label>
                     <div class="voucher-input">
-                        <input type="text" id="voucher_code" name="voucher_code" class="form-control" placeholder="Masukkan kode voucher (opsional)">
-                        <button type="button" class="btn-apply-voucher" onclick="applyVoucher()">
-                            <i class="fas fa-check"></i> Terapkan
-                        </button>
+                        <input type="text" id="voucher_code" name="voucher_code" placeholder="Masukkan kode voucher">
+                        <button type="button" class="btn-apply-voucher" onclick="applyVoucher()">Terapkan</button>
                     </div>
-                    <small id="voucher-message" style="margin-top:0.75rem; display:block; font-weight: 600;"></small>
+                    <small id="voucher-message" style="margin-top:0.75rem; display:block;"></small>
                 </div>
                 
                 <div class="order-summary" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #eee;">
                     <div class="summary-row">
-                        <span><i class="fas fa-shopping-cart"></i> Subtotal Produk</span>
+                        <span>Subtotal Produk</span>
                         <span id="subtotal"><?php echo format_price($totalPrice); ?></span>
                     </div>
                     <div class="summary-row">
-                        <span><i class="fas fa-truck"></i> Ongkos Kirim</span>
+                        <span>Ongkos Kirim</span>
                         <span id="shipping-cost"><?php echo format_price($shippingOptions['jne_reg']['cost']); ?></span>
                     </div>
                     <div class="summary-row discount-row" id="discount-row" style="display:none;">
-                        <span><i class="fas fa-percent"></i> Diskon Voucher</span>
+                        <span>Diskon Voucher</span>
                         <span id="discount-amount">- Rp 0</span>
                     </div>
                     <div class="summary-row total-row">
-                        <span><i class="fas fa-money-bill-wave"></i> Total Pembayaran</span>
+                        <span>Total Pembayaran</span>
                         <span id="total-payment"><?php echo format_price($totalPrice + $shippingOptions['jne_reg']['cost']); ?></span>
                     </div>
                 </div>
                 <button type="submit" form="checkout-form" class="btn-order" id="order-btn" <?php if (!$primaryAddress) echo 'disabled'; ?>>
                     <i class="fas fa-shield-alt"></i> Bayar Sekarang
                 </button>
-                <?php if (!$primaryAddress): ?>
-                <small style="color: #d9534f; text-align: center; display: block; margin-top: 0.5rem;">
-                    <i class="fas fa-info-circle"></i> Silakan atur alamat pengiriman terlebih dahulu
-                </small>
-                <?php endif; ?>
             </div>
         </div>
     </main>
 
     <script>
+        // Variabel global untuk data ringkasan
         let subtotal = <?php echo $totalPrice; ?>;
         let shippingCost = <?php echo $shippingOptions['jne_reg']['cost']; ?>;
         let discount = 0;
         let appliedVoucher = null;
 
-        // Handle shipping method selection
+        // Fungsi pembantu untuk memformat harga
+        function formatPrice(price) {
+            return 'Rp ' + parseInt(price).toLocaleString('id-ID');
+        }
+
+        // Fungsi untuk mengupdate total pembayaran
+        function updateTotal() {
+            const total = subtotal + shippingCost - discount;
+            document.getElementById('total-payment').textContent = formatPrice(total);
+        }
+
+        // Event listener untuk pilihan pengiriman
         document.querySelectorAll('input[name="shipping_method"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                // Update visual selection
-                document.querySelectorAll('.shipping-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
+                document.querySelectorAll('.shipping-option').forEach(option => option.classList.remove('selected'));
                 this.closest('.shipping-option').classList.add('selected');
                 
-                // Update shipping cost
                 shippingCost = parseInt(this.dataset.cost);
-                document.getElementById('shipping-cost').textContent = 'Rp ' + shippingCost.toLocaleString('id-ID');
+                document.getElementById('shipping-cost').textContent = formatPrice(shippingCost);
                 updateTotal();
             });
         });
 
-        // Set initial selection
+        // Atur pilihan awal yang 'checked'
         document.querySelector('input[name="shipping_method"]:checked').closest('.shipping-option').classList.add('selected');
 
-        function updateTotal() {
-            const total = subtotal + shippingCost - discount;
-            document.getElementById('total-payment').textContent = 'Rp ' + total.toLocaleString('id-ID');
-        }
-
+        // Fungsi untuk menerapkan voucher
         function applyVoucher() {
             const voucherCode = document.getElementById('voucher_code').value.trim();
             const voucherMessage = document.getElementById('voucher-message');
             const applyBtn = document.querySelector('.btn-apply-voucher');
-            
-            if (!voucherCode) {
-                voucherMessage.style.color = 'red';
-                voucherMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Silakan masukkan kode voucher';
-                return;
-            }
 
-            // Show loading
-            applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            if (!voucherCode) { return; }
+
+            applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             applyBtn.disabled = true;
 
             const formData = new FormData();
             formData.append('action', 'apply_voucher');
             formData.append('voucher_code', voucherCode);
 
-            fetch('ajax/ajax_handler.php', { 
-                method: 'POST', 
-                body: formData 
-            })
+            fetch('ajax/ajax_handler.php', { method: 'POST', body: formData })
             .then(res => res.json())
             .then(data => {
                 voucherMessage.style.color = data.status === 'success' ? 'green' : 'red';
+                voucherMessage.innerHTML = data.message;
                 
                 if (data.status === 'success') {
                     const voucher = data.data;
@@ -708,36 +676,27 @@ $shippingOptions = [
                     }
                     
                     document.getElementById('discount-row').style.display = 'flex';
-                    document.getElementById('discount-amount').textContent = '- Rp ' + discount.toLocaleString('id-ID');
+                    document.getElementById('discount-amount').textContent = '- ' + formatPrice(discount);
                     
-                    voucherMessage.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message}`;
-                    
-                    // Disable input and change button
                     document.getElementById('voucher_code').disabled = true;
-                    applyBtn.innerHTML = '<i class="fas fa-times"></i> Hapus';
+                    applyBtn.innerHTML = 'Hapus';
                     applyBtn.onclick = removeVoucher;
                 } else {
                     discount = 0;
                     appliedVoucher = null;
                     document.getElementById('discount-row').style.display = 'none';
-                    voucherMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${data.message}`;
                 }
-                
                 updateTotal();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                voucherMessage.style.color = 'red';
-                voucherMessage.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Terjadi kesalahan saat memproses voucher';
             })
             .finally(() => {
                 if (!appliedVoucher) {
-                    applyBtn.innerHTML = '<i class="fas fa-check"></i> Terapkan';
+                    applyBtn.innerHTML = 'Terapkan';
                     applyBtn.disabled = false;
                 }
             });
         }
-
+        
+        // Fungsi untuk menghapus voucher
         function removeVoucher() {
             discount = 0;
             appliedVoucher = null;
@@ -747,148 +706,56 @@ $shippingOptions = [
             document.getElementById('voucher-message').textContent = '';
             
             const applyBtn = document.querySelector('.btn-apply-voucher');
-            applyBtn.innerHTML = '<i class="fas fa-check"></i> Terapkan';
+            applyBtn.innerHTML = 'Terapkan';
             applyBtn.onclick = applyVoucher;
-            applyBtn.disabled = false;
             
             updateTotal();
         }
 
-        // Handle form submission
+        // ===================================================================================
+        // INI ADALAH BAGIAN UTAMA YANG DIPERBAIKI UNTUK MENGATASI MASALAH REDIRECT
+        // ===================================================================================
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+            e.preventDefault(); // Mencegah form submit secara normal
+
             const orderBtn = document.getElementById('order-btn');
-            const selectedShipping = document.querySelector('input[name="shipping_method"]:checked');
-            
-            if (!selectedShipping) {
-                alert('Silakan pilih metode pengiriman');
-                return;
-            }
-            
-            // Show loading state
-            orderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses Pesanan...';
+            orderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
             orderBtn.disabled = true;
-            
-            // Add voucher and total to form
-            const form = this;
-            
-            // Remove existing hidden inputs for checkout data
-            const existingInputs = form.querySelectorAll('input[data-checkout]');
-            existingInputs.forEach(input => input.remove());
-            
-            // Add hidden inputs for checkout data
-            const hiddenInputs = [
-                { name: 'shipping_cost', value: shippingCost },
-                { name: 'discount_amount', value: discount },
-                { name: 'total_amount', value: subtotal + shippingCost - discount },
-                { name: 'voucher_code_applied', value: appliedVoucher ? appliedVoucher.code : '' },
-                { name: 'total_weight', value: <?php echo $totalWeight; ?> }
-            ];
-            
-            hiddenInputs.forEach(input => {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = input.name;
-                hiddenInput.value = input.value;
-                hiddenInput.setAttribute('data-checkout', 'true');
-                form.appendChild(hiddenInput);
-            });
-            
-            // Submit form
-            form.submit();
-        });
 
-        // Responsive behavior for mobile
-        function handleResize() {
-            const container = document.querySelector('.container');
-            const voucherInput = document.querySelector('.voucher-input');
+            const formData = new FormData(this);
+            formData.append('action', 'prepare_checkout');
             
-            if (window.innerWidth <= 768) {
-                container.style.gridTemplateColumns = '1fr';
-                if (voucherInput) {
-                    voucherInput.style.flexDirection = 'column';
+            // Tambahkan data total yang sudah dihitung oleh JavaScript
+            formData.append('total_amount', subtotal + shippingCost - discount);
+            formData.append('shipping_cost', shippingCost);
+            formData.append('discount_amount', discount);
+            if (appliedVoucher) {
+                formData.append('voucher_code_applied', appliedVoucher.code);
+            }
+            formData.append('total_weight', <?php echo $totalWeight; ?>);
+
+            // Kirim data ke ajax_handler untuk disimpan di session
+            fetch('ajax/ajax_handler.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Jika BERHASIL disimpan, baru arahkan ke halaman pembayaran
+                    window.location.href = 'metodepembayaran.php';
+                } else {
+                    // Jika GAGAL, tampilkan pesan error
+                    alert('Terjadi kesalahan: ' + data.message);
+                    orderBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Bayar Sekarang';
+                    orderBtn.disabled = false;
                 }
-            } else {
-                container.style.gridTemplateColumns = '2fr 1fr';
-                if (voucherInput) {
-                    voucherInput.style.flexDirection = 'row';
-                }
-            }
-        }
-
-        // Initial call and event listener
-        handleResize();
-        window.addEventListener('resize', handleResize);
-
-        // Auto-format phone numbers (if needed)
-        function formatPhoneNumber(phone) {
-            // Simple Indonesian phone number formatting
-            const cleaned = phone.replace(/\D/g, '');
-            if (cleaned.startsWith('62')) {
-                return '+' + cleaned;
-            } else if (cleaned.startsWith('0')) {
-                return '+62' + cleaned.substring(1);
-            }
-            return phone;
-        }
-
-        // Smooth scroll to sections on error
-        function scrollToError(element) {
-            element.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-            });
-        }
-
-        // Validate form before submission
-        function validateCheckoutForm() {
-            const requiredFields = {
-                'shipping_address': 'Alamat pengiriman',
-                'recipient_name': 'Nama penerima',
-                'recipient_phone': 'Nomor telepon penerima'
-            };
-
-            for (const [fieldName, fieldLabel] of Object.entries(requiredFields)) {
-                const field = document.querySelector(`input[name="${fieldName}"]`);
-                if (!field || !field.value.trim()) {
-                    alert(`${fieldLabel} harus diisi`);
-                    return false;
-                }
-            }
-
-            const selectedShipping = document.querySelector('input[name="shipping_method"]:checked');
-            if (!selectedShipping) {
-                alert('Silakan pilih metode pengiriman');
-                return false;
-            }
-
-            return true;
-        }
-
-        // Enhanced form validation
-        document.getElementById('checkout-form').addEventListener('submit', function(e) {
-            if (!validateCheckoutForm()) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        // Price formatting helper
-        function formatPrice(price) {
-            return 'Rp ' + parseInt(price).toLocaleString('id-ID');
-        }
-
-        // Update shipping cost display when selection changes
-        document.addEventListener('DOMContentLoaded', function() {
-            const shippingOptions = document.querySelectorAll('input[name="shipping_method"]');
-            shippingOptions.forEach(option => {
-                option.addEventListener('change', function() {
-                    const cost = parseInt(this.dataset.cost);
-                    shippingCost = cost;
-                    document.getElementById('shipping-cost').textContent = formatPrice(cost);
-                    updateTotal();
-                });
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                alert('Tidak dapat terhubung ke server. Silakan coba lagi.');
+                orderBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Bayar Sekarang';
+                orderBtn.disabled = false;
             });
         });
     </script>

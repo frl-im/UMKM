@@ -538,4 +538,38 @@ function set_primary_address($user_id, $address_id) {
     return mysqli_stmt_execute($stmt);
 }
 
+// FUNGSI BARU: Mengambil produk berdasarkan kategori
+function ambil_produk_by_kategori($kategori) {
+    global $koneksi;
+    
+    // Menggunakan prepared statement untuk keamanan dari SQL Injection
+    $stmt = mysqli_prepare($koneksi, 
+        "SELECT 
+            p.*, 
+            u.store_name AS author,
+            u.fullname AS seller_name
+         FROM products p 
+         LEFT JOIN users u ON p.seller_id = u.id 
+         WHERE p.category = ? AND p.status = 'active' AND p.stock > 0
+         ORDER BY p.created_at DESC"
+    );
+
+    // Jika statement gagal disiapkan, ini akan membantu proses debug
+    if ($stmt === false) {
+        error_log("Prepare statement failed in ambil_produk_by_kategori: " . mysqli_error($koneksi));
+        return []; // Kembalikan array kosong jika query gagal
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $kategori);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    
+    $products = [];
+    while($row = mysqli_fetch_assoc($result)) {
+        $products[] = $row;
+    }
+    
+    return $products;
+}
+
 ?>

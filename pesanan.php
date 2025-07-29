@@ -1,9 +1,9 @@
 <?php
 require_once 'fungsi.php';
  check_login('pembeli');
- // Menggunakan status yang benar sesuai database Anda
+ // Mengambil data pesanan untuk setiap status
  $pesanan_pending = ambil_pesanan_by_status('pending');
- $pesanan_processing = ambil_pesanan_by_status('processing');
+ $pesanan_processing = ambil_pesanan_by_status('processing'); // Anda mungkin perlu status 'paid' atau 'settlement' juga
  $pesanan_shipped = ambil_pesanan_by_status('shipped');
  $pesanan_delivered = ambil_pesanan_by_status('delivered');
  $pesanan_cancelled = ambil_pesanan_by_status('cancelled');
@@ -16,28 +16,37 @@ require_once 'fungsi.php';
     <title>Pesanan Saya - KreasiLokal.id</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* CSS Anda tidak perlu diubah */
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; color: #333; }
-        .navbar { background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; align-items: center; }
+        .navbar { background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 2rem; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
         .navbar .back-link { font-size: 1.2rem; color: #333; text-decoration: none; display: flex; align-items: center; }
         .navbar .logo { font-size: 1.5rem; font-weight: bold; color: #2e8b57; text-decoration: none; margin-left: 1rem; }
-        .container { max-width: 900px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .page-header h2 { margin: 0; font-size: 1.8rem; font-weight: 600; }
-        .btn { display: inline-block; padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .page-header h2 { margin: 0 0 2rem 0; font-size: 1.8rem; font-weight: 600; }
+        .btn { display: inline-block; padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color 0.2s; }
         .btn-primary { background-color: #2e8b57; color: white; }
+        .btn-secondary { background-color: #f0f0f0; color: #333; }
         .empty-state { text-align: center; padding: 4rem 2rem; border: 2px dashed #ddd; border-radius: 8px; background-color: #fafafa; }
-        .empty-state i { font-size: 4rem; color: #ccc; margin-bottom: 1.5rem; }
-        .empty-state p { font-size: 1.2rem; color: #777; margin: 0; }
-        footer { text-align: center; margin-top: 3rem; padding: 1rem; color: #888; }
-        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 2rem; overflow-x: auto; }
+        .empty-state i { font-size: 3rem; color: #ccc; margin-bottom: 1.5rem; }
+        .empty-state p { font-size: 1.1rem; color: #777; margin: 0; }
+        .tabs { display: flex; border-bottom: 2px solid #eee; margin-bottom: 2rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tab-item { padding: 1rem 1.5rem; cursor: pointer; font-weight: 600; color: #777; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; }
         .tab-item.active { color: #2e8b57; border-bottom-color: #2e8b57; }
-        .order-item { border: 1px solid #eee; border-radius: 8px; margin-bottom: 1.5rem; padding: 1.5rem; }
-        .order-header { display: flex; justify-content: space-between; padding-bottom: 1rem; border-bottom: 1px solid #eee; margin-bottom: 1rem; align-items: center; }
-        .order-header p, .order-header h4 { margin: 0; }
-        .order-product { display: flex; gap: 1rem; align-items: center; }
-        .order-product img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
-        .order-footer { text-align: right; margin-top: 1rem; }
+        .order-item { border: 1px solid #eee; border-radius: 8px; margin-bottom: 1.5rem; background-color: #fff; }
+        .order-header { display: flex; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid #eee; align-items: center; }
+        .order-header .store-name { font-weight: 600; }
+        .order-header .status { font-weight: bold; }
+        .status-pending { color: #f0ad4e; }
+        .status-processing { color: #0275d8; }
+        .status-shipped { color: #5cb85c; }
+        .status-delivered { color: #2e8b57; }
+        .status-cancelled { color: #d9534f; }
+        .order-product { display: flex; gap: 1rem; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f5f5f5; }
+        .order-product:last-child { border-bottom: none; }
+        .order-product img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; }
+        .product-info h4 { margin: 0 0 0.25rem 0; font-size: 1rem; }
+        .product-info p { margin: 0; color: #777; font-size: 0.9rem; }
+        .order-footer { text-align: right; padding: 1rem 1.5rem; background-color: #fafafa; border-top: 1px solid #eee; border-radius: 0 0 8px 8px; }
+        .order-footer p { margin: 0 0 1rem 0; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
@@ -45,105 +54,120 @@ require_once 'fungsi.php';
 <body>
     <nav class="navbar">
         <a href="profilpembeli.php" class="back-link"><i class="fas fa-arrow-left"></i></a>
-        <a href="index.php" class="logo">KreasiLokal.id</a>
+        <a href="index.php" class="logo">Pesanan Saya</a>
     </nav>
     <div class="container">
         <div class="page-header">
-            <h2>Pesanan Saya</h2>
+            <h2>Riwayat Transaksi</h2>
         </div>
         <div class="tabs">
-<<<<<<< HEAD
-            <div class="tab-item active" data-tab="belum-bayar">Belum Bayar</div>
-            <div class="tab-item" data-tab="dikemas">Dikemas</div>
-            <div class="tab-item" data-tab="dikirim">Dikirim</div>
-            <div class="tab-item" data-tab="selesai">Selesai</div>
-            <div class="tab-item" data-tab="dibatalkan">Dibatalkan</div>
+            <div class="tab-item active" data-tab="pending">Belum Bayar</div>
+            <div class="tab-item" data-tab="processing">Dikemas</div>
+            <div class="tab-item" data-tab="shipped">Dikirim</div>
+            <div class="tab-item" data-tab="delivered">Selesai</div>
+            <div class="tab-item" data-tab="cancelled">Dibatalkan</div>
         </div>
 
-        <div id="belum-bayar" class="tab-content active">
+        <div id="pending" class="tab-content active">
             <?php if (empty($pesanan_pending)): ?>
                 <div class="empty-state"><i class="fas fa-wallet"></i><p>Tidak ada pesanan yang menunggu pembayaran.</p></div>
-            <?php else: ?>
-                <?php foreach ($pesanan_pending as $pesanan): ?>
-                    <div class="order-item">
-                        <div class="order-header">
-                            <h4><?php echo safe_output($pesanan['store_name']); ?></h4>
-                            <p style="color: #d9534f; font-weight: bold;">Menunggu Pembayaran</p>
+            <?php else: foreach ($pesanan_pending as $pesanan): ?>
+                <div class="order-item">
+                    <?php foreach ($pesanan['items'] as $item): ?>
+                    <div class="order-product">
+                        <img src="<?php echo safe_output($item['product_image_path'] ?? 'https://via.placeholder.com/150'); ?>" alt="Produk">
+                        <div class="product-info">
+                            <h4><?php echo safe_output($item['product_name']); ?></h4>
+                            <p><?php echo safe_output($item['quantity']); ?> x <?php echo format_price($item['price_per_item']); ?></p>
+                            <small>dari <?php echo safe_output($item['store_name']); ?></small>
                         </div>
-                        <div class="order-product">
-                            <img src="<?php echo safe_output($pesanan['product_image_path'] ?? 'https://via.placeholder.com/150'); ?>" alt="Produk">
-                            <div>
-                                <h4><?php echo safe_output($pesanan['product_name']); ?></h4>
-                                <p><?php echo safe_output($pesanan['quantity']); ?> x <?php echo format_price($pesanan['price_per_item']); ?></p>
-                            </div>
-                        </div>
-                        <div class="order-footer">
-                             <p>Total Pesanan: <strong style="font-size: 1.2rem; color: #2e8b57;"><?php echo format_price($pesanan['total_amount']); ?></strong></p>
-                            <a href="bayar.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Bayar Sekarang</a>
-                        </div>
-=======
-    <a href="pesanan.php" class="tab-item active">Belum Bayar</a>
-    <a href="dikemas.php" class="tab-item">Dikemas</a>
-    <a href="dikirim.php" class="tab-item">Dikirim</a>
-    <a href="beri_penilaian.php" class="tab-item">Beri Penilaian</a>
-    <a href="selesai.php" class="tab-item">Selesai</a>
-</div>
-        <div class="tab-content">
-            <div class="order-item">
-                <div class="order-header">
-                    <h4>Toko Batik Trusmi</h4>
-                    <p style="color: #d9534f; font-weight: bold;">Menunggu Pembayaran</p>
-                </div>
-                <div class="order-product">
-                    <img src="https://dynamic.zacdn.com/CAqpEXN0152sEQHTIO3s3RVPYCE=/filters:quality(70):format(webp)/https://static-id.zacdn.com/p/arjuna-weda-6040-2520944-3.jpg" alt="Produk">
-                    <div>
-                        <h4>Kemeja Batik Mega Mendung</h4>
-                        <p>1 x Rp150.000</p>
->>>>>>> ceacfe38b8eb1b032b23cc81903b93c9dc0bfb65
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                    <?php endforeach; ?>
+                    <div class="order-footer">
+                        <p>Total Pesanan: <strong style="font-size: 1.2rem; color: #2e8b57;"><?php echo format_price($pesanan['total_amount']); ?></strong></p>
+                        <a href="bayar.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Bayar Sekarang</a>
+                    </div>
+                </div>
+            <?php endforeach; endif; ?>
         </div>
 
-        <div id="dikemas" class="tab-content">
+        <div id="processing" class="tab-content">
              <?php if (empty($pesanan_processing)): ?>
                 <div class="empty-state"><i class="fas fa-box-open"></i><p>Tidak ada pesanan yang sedang dikemas.</p></div>
-            <?php else: ?>
-                <?php foreach ($pesanan_processing as $pesanan): ?>
+            <?php else: foreach ($pesanan_processing as $pesanan): ?>
+                <div class="order-item">
+                    <?php foreach ($pesanan['items'] as $item): ?>
+                    <div class="order-product">
+                        <img src="<?php echo safe_output($item['product_image_path'] ?? 'https://via.placeholder.com/150'); ?>" alt="Produk">
+                        <div class="product-info">
+                            <h4><?php echo safe_output($item['product_name']); ?></h4>
+                            <p><?php echo safe_output($item['quantity']); ?> x <?php echo format_price($item['price_per_item']); ?></p>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
-            <?php endif; ?>
+                    <div class="order-footer">
+                        <p>Total Pesanan: <strong><?php echo format_price($pesanan['total_amount']); ?></strong></p>
+                        <a href="lacak.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-secondary">Lacak Pesanan</a>
+                    </div>
+                </div>
+            <?php endforeach; endif; ?>
         </div>
 
-        <div id="dikirim" class="tab-content">
+        <div id="shipped" class="tab-content">
               <?php if (empty($pesanan_shipped)): ?>
                 <div class="empty-state"><i class="fas fa-truck"></i><p>Tidak ada pesanan yang sedang dikirim.</p></div>
-            <?php else: ?>
-                <?php foreach ($pesanan_shipped as $pesanan): ?>
+            <?php else: foreach ($pesanan_shipped as $pesanan): ?>
+                <div class="order-item">
+                    <?php foreach ($pesanan['items'] as $item): ?>
+                    <div class="order-product">
+                        <img src="<?php echo safe_output($item['product_image_path'] ?? 'https://via.placeholder.com/150'); ?>" alt="Produk">
+                        <div class="product-info">
+                            <h4><?php echo safe_output($item['product_name']); ?></h4>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
-            <?php endif; ?>
+                    <div class="order-footer">
+                        <a href="lacak.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Lacak Pengiriman</a>
+                    </div>
+                </div>
+            <?php endforeach; endif; ?>
         </div>
 
-        <div id="selesai" class="tab-content">
+        <div id="delivered" class="tab-content">
              <?php if (empty($pesanan_delivered)): ?>
                 <div class="empty-state"><i class="fas fa-check-circle"></i><p>Belum ada pesanan yang selesai.</p></div>
-            <?php else: ?>
-                <?php foreach ($pesanan_delivered as $pesanan): ?>
+            <?php else: foreach ($pesanan_delivered as $pesanan): ?>
+                <div class="order-item">
+                    <?php foreach ($pesanan['items'] as $item): ?>
+                    <div class="order-product">
+                        <img src="<?php echo safe_output($item['product_image_path'] ?? 'https://via.placeholder.com/150'); ?>" alt="Produk">
+                        <div class="product-info">
+                            <h4><?php echo safe_output($item['product_name']); ?></h4>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
-            <?php endif; ?>
+                    <div class="order-footer">
+                        <a href="beri_penilaian.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Beri Penilaian</a>
+                    </div>
+                </div>
+            <?php endforeach; endif; ?>
         </div>
 
-        <div id="dibatalkan" class="tab-content">
+        <div id="cancelled" class="tab-content">
              <?php if (empty($pesanan_cancelled)): ?>
                 <div class="empty-state"><i class="fas fa-times-circle"></i><p>Tidak ada pesanan yang dibatalkan.</p></div>
-            <?php else: ?>
-                <?php foreach ($pesanan_cancelled as $pesanan): ?>
+            <?php else: foreach ($pesanan_cancelled as $pesanan): ?>
+                <div class="order-item">
+                    <?php foreach ($pesanan['items'] as $item): ?>
+                    <div class="order-product">
+                        <img src="<?php echo safe_output($item['product_image_path'] ?? 'https://via.placeholder.com/150'); ?>" alt="Produk">
+                        <div class="product-info"><h4><?php echo safe_output($item['product_name']); ?></h4></div>
+                    </div>
                     <?php endforeach; ?>
-            <?php endif; ?>
+                </div>
+            <?php endforeach; endif; ?>
         </div>
     </div>
-    <footer>
-        <p>&copy; 2025 KreasiLokal.id</p>
-    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -166,4 +190,3 @@ require_once 'fungsi.php';
     </script>
 </body>
 </html>
- 
