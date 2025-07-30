@@ -1,3 +1,15 @@
+<?php
+require_once 'fungsi.php';
+
+$message = '';
+if (isset($_POST['reset_password'])) {
+    $email = $_POST['email'];
+    // TODO: Tambahkan logika untuk mengirim email reset password
+    // Contoh: generate_password_reset_token($email); send_reset_email($email, $token);
+    $message = "Jika email " . safe_output($email) . " terdaftar, kami telah mengirimkan tautan reset password.";
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>

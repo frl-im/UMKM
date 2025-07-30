@@ -1,3 +1,8 @@
+<?php
+require_once 'fungsi.php';
+$toko_pilihan = ambil_toko_pilihan();
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -116,37 +121,25 @@
         </section>
 
         <section class="store-grid">
-            <!-- Contoh Toko 1 -->
+    <?php if (empty($toko_pilihan)): ?>
+        <p>Belum ada toko pilihan yang tersedia.</p>
+    <?php else: ?>
+        <?php foreach ($toko_pilihan as $toko): ?>
             <article class="store-card">
-                <a href="#">
-                    <img src="https://placehold.co/300x150/2e8b57/ffffff?text=Batik+Juwita" alt="Banner Toko Batik Juwita">
+                <a href="toko.php?id=<?php echo $toko['id']; ?>">
+                    <img src="<?php echo safe_output($toko['store_banner'] ?? 'https://placehold.co/300x150/2e8b57/ffffff?text=Banner'); ?>" alt="Banner <?php echo safe_output($toko['store_name']); ?>">
                     <div class="store-info">
-                        <img src="https://placehold.co/80x80/ffffff/000000?text=BJ" alt="Logo Toko">
+                        <img src="<?php echo safe_output($toko['profile_picture'] ?? 'https://placehold.co/80x80/ffffff/000000?text=L'); ?>" alt="Logo <?php echo safe_output($toko['store_name']); ?>">
                         <div>
-                            <h3>Toko Batik Juwita</h3>
-                            <p>Menjual batik tulis dan cap asli Yogyakarta.</p>
+                            <h3><?php echo safe_output($toko['store_name']); ?></h3>
+                            <p><?php echo safe_output($toko['store_description'] ?? 'Deskripsi toko belum tersedia.'); ?></p>
                         </div>
                     </div>
                 </a>
             </article>
-
-            <!-- Contoh Toko 2 -->
-            <article class="store-card">
-                <a href="#">
-                    <img src="https://placehold.co/300x150/8b4513/ffffff?text=Dapur+Nusantara" alt="Banner Toko Dapur Nusantara">
-                    <div class="store-info">
-                        <img src="https://placehold.co/80x80/ffffff/000000?text=DN" alt="Logo Toko">
-                        <div>
-                            <h3>Dapur Nusantara</h3>
-                            <p>Rendang dan bumbu instan premium.</p>
-                        </div>
-                    </div>
-                </a>
-            </article>
-
-            <!-- Tambahkan toko lainnya di sini -->
-
-        </section>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</section>
     </main>
 
     <footer style="text-align: center; padding: 2rem; margin-top: 2rem;">

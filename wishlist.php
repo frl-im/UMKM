@@ -1,3 +1,10 @@
+<?php
+require_once 'fungsi.php';
+check_login('pembeli'); // Hanya pembeli yang bisa akses wishlist
+
+$wishlist_items = ambil_wishlist_by_user($_SESSION['user_id']);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>

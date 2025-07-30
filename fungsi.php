@@ -571,5 +571,126 @@ function ambil_produk_by_kategori($kategori) {
     
     return $products;
 }
+// TAMBAHKAN SEMUA FUNGSI INI KE DALAM FILE fungsi.php
 
+// Fungsi untuk Wishlist
+function tambah_ke_wishlist($user_id, $product_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $pid = (int)$product_id;
+
+    // Cek dulu agar tidak duplikat
+    $stmt_check = mysqli_prepare($koneksi, "SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?");
+    mysqli_stmt_bind_param($stmt_check, "ii", $uid, $pid);
+    mysqli_stmt_execute($stmt_check);
+    if (mysqli_stmt_get_result($stmt_check)->num_rows > 0) {
+        return ['status' => 'info', 'message' => 'Produk sudah ada di wishlist.'];
+    }
+
+    $stmt = mysqli_prepare($koneksi, "INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt, "ii", $uid, $pid);
+    if (mysqli_stmt_execute($stmt)) {
+        return ['status' => 'success', 'message' => 'Produk berhasil ditambahkan ke wishlist!'];
+    }
+    return ['status' => 'error', 'message' => 'Gagal menambahkan ke wishlist.'];
+}
+
+function ambil_wishlist_by_user($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $query = "SELECT p.id, p.name, p.price, p.image_url FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.user_id = ?";
+    $stmt = mysqli_prepare($koneksi, $query);
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+// Fungsi untuk Toko Pilihan
+function ambil_toko_pilihan() {
+    global $koneksi;
+    // Query ini hanya mengambil kolom yang pasti ada
+    $query = "SELECT id, store_name, store_description FROM users WHERE role = 'penjual' AND verification_status = 'verified' LIMIT 10";
+    $result = mysqli_query($koneksi, $query);
+
+    // Menambahkan pengecekan error agar tidak terjadi fatal error
+    if ($result === false) {
+        return []; // Kembalikan array kosong jika query gagal
+    }
+    
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+// Fungsi untuk Voucher
+function ambil_semua_voucher() {
+    global $koneksi;
+    $query = "SELECT * FROM vouchers WHERE is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())";
+    $result = mysqli_query($koneksi, $query);
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
+}
+
+// TAMBAHKAN DUA FUNGSI INI KE DALAM FILE fungsi.php
+
+/**
+ * Fungsi untuk mengklaim voucher berdasarkan kode.
+ */
+function klaim_voucher_by_code($user_id, $voucher_code) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $code = mysqli_real_escape_string($koneksi, $voucher_code);
+
+    // 1. Cari voucher berdasarkan kodenya
+    $stmt_find = mysqli_prepare($koneksi, "SELECT id FROM vouchers WHERE voucher_code = ? AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())");
+    mysqli_stmt_bind_param($stmt_find, "s", $code);
+    mysqli_stmt_execute($stmt_find);
+    $result_find = mysqli_stmt_get_result($stmt_find);
+    $voucher = mysqli_fetch_assoc($result_find);
+
+    if (!$voucher) {
+        return "Voucher tidak valid atau sudah kedaluwarsa.";
+    }
+    $voucher_id = $voucher['id'];
+
+    // 2. Cek apakah user sudah pernah klaim voucher ini
+    $stmt_check = mysqli_prepare($koneksi, "SELECT id FROM user_vouchers WHERE user_id = ? AND voucher_id = ?");
+    mysqli_stmt_bind_param($stmt_check, "ii", $uid, $voucher_id);
+    mysqli_stmt_execute($stmt_check);
+    if (mysqli_stmt_get_result($stmt_check)->num_rows > 0) {
+        return "Anda sudah pernah mengklaim voucher ini.";
+    }
+
+    // 3. Tambahkan voucher ke koleksi user
+    $stmt_claim = mysqli_prepare($koneksi, "INSERT INTO user_vouchers (user_id, voucher_id) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt_claim, "ii", $uid, $voucher_id);
+    if (mysqli_stmt_execute($stmt_claim)) {
+        return "Voucher berhasil diklaim!";
+    }
+    return "Terjadi kesalahan saat mengklaim voucher.";
+}
+
+/**
+ * Fungsi untuk mengambil semua voucher yang dimiliki user.
+ */
+// HAPUS FUNGSI klaim_voucher_by_code DAN GANTI DENGAN INI
+function klaim_voucher_by_id($user_id, $voucher_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $vid = (int)$voucher_id;
+
+    // Cek apakah user sudah pernah klaim voucher ini
+    $stmt_check = mysqli_prepare($koneksi, "SELECT id FROM user_vouchers WHERE user_id = ? AND voucher_id = ?");
+    mysqli_stmt_bind_param($stmt_check, "ii", $uid, $vid);
+    mysqli_stmt_execute($stmt_check);
+    if (mysqli_stmt_get_result($stmt_check)->num_rows > 0) {
+        return "Anda sudah pernah mengklaim voucher ini.";
+    }
+
+    // Tambahkan voucher ke koleksi user
+    $stmt_claim = mysqli_prepare($koneksi, "INSERT INTO user_vouchers (user_id, voucher_id) VALUES (?, ?)");
+    mysqli_stmt_bind_param($stmt_claim, "ii", $uid, $vid);
+    if (mysqli_stmt_execute($stmt_claim)) {
+        return "Voucher berhasil diklaim! Cek di 'Voucher Saya'.";
+    }
+    return "Terjadi kesalahan saat mengklaim voucher.";
+}
 ?>
