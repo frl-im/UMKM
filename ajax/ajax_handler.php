@@ -1,20 +1,9 @@
 <?php
-// Memuat autoloader dari Composer dan library phpdotenv
-require_once __DIR__ . '/../vendor/autoload.php';
-
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
-
-// ... (sisa kode Anda selanjutnya)
-// Baris ini untuk menampilkan error PHP secara langsung, PENTING untuk debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Pastikan path ini benar, keluar satu folder untuk menemukan fungsi.php
 require_once '../fungsi.php'; 
+error_reporting(E_ALL);
+ini_set('display_errors', 1); 
 header('Content-Type: application/json');
 
-// Fungsi bantuan untuk response JSON
 function json_response($status, $message, $data = null) {
     echo json_encode(['status' => $status, 'message' => $message, 'data' => $data]);
     exit();
@@ -31,7 +20,6 @@ $current_user_id = $_SESSION['user_id'];
 global $koneksi;
 
 switch ($action) {
-    // ==================== FUNGSI CHAT (KODE LAMA ANDA) ====================
     case 'send_message':
         $receiver_id = (int)($_POST['receiver_id'] ?? 0);
         $message = trim($_POST['message'] ?? '');
@@ -75,7 +63,6 @@ switch ($action) {
         json_response('success', 'Pesan diambil.', $messages);
         break;
 
-    // ==================== FUNGSI KERANJANG (KODE LAMA ANDA) ====================
     case 'add_to_cart':
         $product_id = (int)($_POST['product_id'] ?? 0);
         
@@ -116,7 +103,6 @@ switch ($action) {
         json_response('success', 'Item berhasil dihapus.');
         break;
         
-    // ==================== FUNGSI PESANAN & CHECKOUT (KODE LAMA ANDA + KODE BARU) ====================
     case 'create_order':
         $payment_method = $_POST['payment_method'] ?? '';
         $shipping_address = $_POST['shipping_address'] ?? '';
@@ -167,81 +153,105 @@ switch ($action) {
         json_response('success', 'Data checkout siap.');
         break;
 
-    // ==================== FUNGSI PEMBAYARAN MIDTRANS (KODE BARU YANG SUDAH DIPERBAIKI) ====================
     case 'create_payment':
-
         $checkoutData = $_SESSION['checkout_data'] ?? null;
         if (!$checkoutData) {
-            json_response('error', 'Sesi checkout tidak ditemukan. Ulangi dari keranjang.');
+            json_response('error', 'Sesi checkout tidak ditemukan.');
         }
 
-        // =======================================================================
-        // PERHATIAN: PASTIKAN ANDA MENGGANTI SERVER KEY DI BAWAH INI!
-        // INI ADALAH PENYEBAB PALING UMUM DARI ERROR "NOT VALID JSON"
-        // =======================================================================
-        \Midtrans\Config::$serverKey = $_ENV['MIDTRANS_SERVER_KEY'];
-        \Midtrans\Config::$isProduction = false;
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
-
-        $paymentType = $_POST['payment_type'];
-        $orderId = 'KREASI-' . time();
-        $totalAmount = (int) $checkoutData['total_amount'];
-
-        $params = [
-            'transaction_details' => [
-                'order_id' => $orderId,
-                'gross_amount' => $totalAmount,
-            ],
-            'customer_details' => [
-                'first_name' => $_SESSION['user_name'] ?? 'Guest',
-                'email' => $_SESSION['user_email'] ?? 'guest@example.com',
-            ]
-        ];
+        // Load Composer autoload
+        $autoload_path = '../vendor/autoload.php';
         
-        // Logika untuk VA Bank
-        if (strpos($paymentType, '_va') !== false) {
-             if ($paymentType === 'mandiri_va') {
-                 $params['payment_type'] = 'echannel';
-                 $params['echannel'] = ['bill_info1' => 'Pembayaran untuk:', 'bill_info2' => 'Order ' . $orderId];
-             } else {
-                 $params['payment_type'] = 'bank_transfer';
-                 $params['bank_transfer'] = ['bank' => str_replace('_va', '', $paymentType)];
-             }
-        } else {
-             $params['payment_type'] = $paymentType;
+        if (!file_exists($autoload_path)) {
+            json_response('error', 'Composer autoload tidak ditemukan. Jalankan: composer install');
         }
         
-        if ($paymentType === 'shopeepay') {
-            $params['shopeepay'] = ['callback_url' => 'https://example.com/status?order_id=' . $orderId];
-        }
-        
+        require_once $autoload_path;
+
         try {
-            $stmt = mysqli_prepare($koneksi, "INSERT INTO orders (id, user_id, total_amount, status, created_at) VALUES (?, ?, ?, 'pending', NOW())");
-            mysqli_stmt_bind_param($stmt, "sid", $orderId, $current_user_id, $totalAmount);
-            mysqli_stmt_execute($stmt);
+            // Set Xendit API Key untuk Xendit SDK versi 7.0
+            \Xendit\Configuration::setXenditKey('xnd_development_udQ0g57Psr0X6XRB1EpmryMle34l3opt3f3TXWzXUDFOpZ2E7A3LX7jKOkZQ4YGY');
 
-            $chargeResponse = \Midtrans\CoreApi::charge($params);
+            $external_id = 'KREASI-' . time() . '-' . $current_user_id;
+            $totalAmount = (int) $checkoutData['total_amount'];
+            $paymentMethod = $_POST['payment_method'] ?? '';
 
-            $frontendData = [];
-            if ($chargeResponse->payment_type == 'qris') {
-                $frontendData = ['type' => 'qris', 'title' => 'Pembayaran via QRIS', 'qr_string' => $chargeResponse->qr_string, 'expiry_time' => date('d M Y H:i:s', strtotime($chargeResponse->expiry_time))];
-            } elseif (isset($chargeResponse->va_numbers)) {
-                $frontendData = ['type' => 'va', 'title' => 'Pembayaran ' . strtoupper($chargeResponse->va_numbers[0]->bank) . ' VA', 'va_number' => $chargeResponse->va_numbers[0]->va_number, 'total' => format_price($chargeResponse->gross_amount), 'expiry_time' => date('d M Y H:i:s', strtotime($chargeResponse->expiry_time))];
-            } elseif ($chargeResponse->payment_type == 'echannel') {
-                $frontendData = ['type' => 'va', 'title' => 'Pembayaran Mandiri Bill', 'va_number' => $chargeResponse->biller_code . ' ' . $chargeResponse->bill_key, 'total' => format_price($chargeResponse->gross_amount), 'expiry_time' => date('d M Y H:i:s', strtotime($chargeResponse->expiry_time))];
-            } elseif ($chargeResponse->payment_type == 'gopay' || $chargeResponse->payment_type == 'shopeepay') {
-                 $ewalletName = ($chargeResponse->payment_type == 'gopay') ? 'GoPay' : 'ShopeePay';
-                 $frontendData = ['type' => 'ewallet', 'name' => $ewalletName, 'title' => 'Pembayaran via ' . $ewalletName, 'deeplink_url' => $chargeResponse->actions[0]->url];
+            if (empty($paymentMethod)) {
+                json_response('error', 'Metode pembayaran harus dipilih.');
             }
-            json_response('success', 'Detail pembayaran berhasil dibuat.', $frontendData);
+
+            // Convert payment method to Xendit format
+            $xendit_payment_methods = [];
+            
+            switch(strtoupper($paymentMethod)) {
+                case 'BCA':
+                    $xendit_payment_methods = ['BCA'];
+                    break;
+                case 'BNI':
+                    $xendit_payment_methods = ['BNI'];
+                    break;
+                case 'BRI':
+                    $xendit_payment_methods = ['BRI'];
+                    break;
+                case 'MANDIRI':
+                    $xendit_payment_methods = ['MANDIRI'];
+                    break;
+                case 'PERMATA':
+                    $xendit_payment_methods = ['PERMATA'];
+                    break;
+                case 'ID_SHOPEEPAY':
+                    $xendit_payment_methods = ['SHOPEEPAY'];
+                    break;
+                case 'ID_DANA':
+                    $xendit_payment_methods = ['DANA'];
+                    break;
+                case 'ID_OVO':
+                    $xendit_payment_methods = ['OVO'];
+                    break;
+                default:
+                    json_response('error', 'Metode pembayaran tidak didukung: ' . $paymentMethod);
+            }
+
+            // Create invoice using Xendit SDK 7.0
+            $params = [ 
+                'external_id' => $external_id,
+                'amount' => $totalAmount,
+                'currency' => 'IDR',
+                'payment_methods' => $xendit_payment_methods,
+                'success_redirect_url' => 'http://localhost:8080/UMKM/pesanan.php?status=sukses&external_id=' . $external_id,
+                'failure_redirect_url' => 'http://localhost:8080/UMKM/pesanan.php?status=gagal&external_id=' . $external_id,
+                'description' => 'Pembelian produk KreasiLokal.id'
+            ];
+
+            // Use Xendit Invoice API for version 7.0
+            $apiInstance = new \Xendit\Invoice\InvoiceApi();
+            $createInvoiceRequest = new \Xendit\Invoice\CreateInvoiceRequest($params);
+            
+            $invoice = $apiInstance->createInvoice($createInvoiceRequest);
+            
+            // Save payment data for tracking
+            $_SESSION['payment_data'] = [
+                'external_id' => $external_id,
+                'invoice_id' => $invoice['id'],
+                'amount' => $totalAmount,
+                'payment_method' => $paymentMethod,
+                'invoice_url' => $invoice['invoice_url']
+            ];
+
+            json_response('success', 'Invoice berhasil dibuat.', [
+                'invoice_url' => $invoice['invoice_url'],
+                'external_id' => $external_id,
+                'invoice_id' => $invoice['id']
+            ]);
+
+        } catch (\Xendit\XenditSdkException $e) {
+            json_response('error', 'Xendit SDK Error: ' . $e->getMessage());
         } catch (Exception $e) {
-            json_response('error', 'Gagal memproses pembayaran: ' . $e->getMessage(), ['raw_error' => $e->__toString()]);
+            json_response('error', 'Error: ' . $e->getMessage());
         }
         break;
 
     default:
-        json_response('error', 'Aksi tidak valid.');
-        break;
+        json_response('error', 'Action tidak valid.');
 }
 ?>
