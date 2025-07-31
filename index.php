@@ -474,10 +474,10 @@ $products = ambil_semua_produk();
       <div class="logo">
         <a href="index.php"><i class="fas fa-leaf"></i> KreasiLokal.id</a>
       </div>
-      <div class="main-search-bar">
-        <input type="text" id="search-input" placeholder="Cari batik, rendang, atau ukiran...">
-        <button><i class="fas fa-search"></i></button>
-      </div>
+      <form action="pencarian.php" method="GET" class="main-search-bar">
+    <input type="text" name="q" placeholder="Cari batik, rendang, atau ukiran..." required>
+    <button type="submit"><i class="fas fa-search"></i></button>
+</form>
       <div class="nav-icons">
         <?php if ($is_logged_in): ?>
           <!-- PERBAIKAN: User sudah login - tampilkan dropdown -->
@@ -653,7 +653,7 @@ $products = ambil_semua_produk();
       
       <div class="footer-bottom">
         <div class="container">
-          <p>&copy; 2024 KreasiLokal.id. Seluruh hak cipta dilindungi undang-undang. | Dibuat dengan <i class="fas fa-heart" style="color: #ff6b6b;"></i> untuk Indonesia</p>
+          <p>&copy; 2025 KreasiLokal.id. Seluruh hak cipta dilindungi undang-undang. | Dibuat dengan <i class="fas fa-heart" style="color: #ff6b6b;"></i> untuk Indonesia</p>
         </div>
       </div>
     </div>
@@ -698,74 +698,7 @@ $products = ambil_semua_produk();
       });
     });
 
-    function renderProducts(products) {
-    // Jika tidak ada produk, tampilkan pesan
-    if (products.length === 0) {
-        return `<p style="grid-column: 1 / -1; text-align: center;">Produk tidak ditemukan.</p>`;
-    }
-
-    let productHTML = '';
-    // Loop melalui setiap produk dan buat kartu HTML-nya
-    products.forEach(product => {
-        productHTML += `
-            <a href="detailproduk.php?id=${product.id}" class="product-card">
-                <div class="product-image">
-                    <img src="${product.image_url}" alt="${product.name}" />
-                </div>
-                <div class="product-info">
-                    <h4>${product.name}</h4>
-                    <div class="product-price">
-                        <span class="current-price">${product.formatted_price}</span>
-                    </div>
-                    <p class="product-origin">Stok: ${product.stock}</p> 
-                </div>
-            </a>
-        `;
-    });
-    return productHTML;
-}
-
-// Ambil elemen yang kita butuhkan dari halaman
-const searchInput = document.getElementById('search-input');
-const productContainer = document.getElementById('product-container');
-const originalProductsHTML = productContainer.innerHTML; // Simpan konten asli
-let debounceTimer;
-
-// Tambahkan event listener yang akan berjalan setiap kali pengguna mengetik
-searchInput.addEventListener('input', function() {
-    const keyword = this.value.trim();
-
-    // Hapus timer sebelumnya untuk "debouncing"
-    clearTimeout(debounceTimer);
-
-    // Jika input kosong, kembalikan ke daftar produk awal
-    if (keyword.length === 0) {
-        productContainer.innerHTML = originalProductsHTML;
-        return;
-    }
-
-    // Jangan cari jika kata kunci terlalu pendek
-    if (keyword.length < 2) {
-        return;
-    }
-
-    // Atur timer. Permintaan AJAX hanya akan dikirim setelah pengguna berhenti mengetik selama 300ms
-    // Ini mencegah request berlebihan ke server
-    debounceTimer = setTimeout(() => {
-        // Kirim request ke backend menggunakan Fetch API
-        fetch(`ajax_searchbar.php?q=${encodeURIComponent(keyword)}`)
-            .then(response => response.json())
-            .then(data => {
-                // Tampilkan produk hasil pencarian
-                const newProductHTML = renderProducts(data);
-                productContainer.innerHTML = newProductHTML;
-            })
-            .catch(error => {
-                console.error('Error fetching search results:', error);
-                productContainer.innerHTML = `<p style="grid-column: 1 / -1; text-align: center;">Terjadi kesalahan saat mencari.</p>`;
-            });
-    }, 300);
-});
+    
   </script>
 
 </body>
