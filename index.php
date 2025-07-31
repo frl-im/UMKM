@@ -18,25 +18,6 @@ $products = ambil_semua_produk();
 
 ?>
 
-<?php include 'database.php'; ?>
-
-<?php
-// Koneksi database
-include 'database.php';
-
-// Ambil data produk
-$query = "SELECT * FROM produk"; // ganti 'produk' dengan nama tabelmu
-$result = mysqli_query($conn, $query);
-
-// Tampilkan setiap produk
-while ($row = mysqli_fetch_assoc($result)) {
-    echo '<div class="produk">';
-    echo '<h3>' . $row['nama_produk'] . '</h3>';
-    echo '<img src="image/' . $row['image'] . '" alt="' . $row['nama_produk'] . '" style="width:200px;">';
-    echo '<p>Harga: Rp' . number_format($row['harga'], 0, ',', '.') . '</p>';
-    echo '</div>';
-}
-?>
 
 <!DOCTYPE html>
 <html lang="id">
