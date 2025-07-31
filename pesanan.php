@@ -85,7 +85,7 @@ require_once 'fungsi.php';
                     <?php endforeach; ?>
                     <div class="order-footer">
                         <p>Total Pesanan: <strong style="font-size: 1.2rem; color: #2e8b57;"><?php echo format_price($pesanan['total_amount']); ?></strong></p>
-                        <a href="bayar.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Bayar Sekarang</a>
+                        <a href="metodepembayaran.php?order_id=<?php echo $pesanan['order_id']; ?>" class="btn btn-primary">Bayar Sekarang</a>
                     </div>
                 </div>
             <?php endforeach; endif; ?>

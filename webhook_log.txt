@@ -1,0 +1,12 @@
+--- Log Diterima: 2025-07-31 05:42:50 ---
+Request Body:
+{"id":"688ae6355cf5b4d18e00752f","external_id":"KREASI-1753933362-2","user_id":"6888fcb5678cde91a6f4732f","payment_method":"BANK_TRANSFER","status":"PAID","merchant_name":"KreasiLokal","amount":315000,"paid_amount":315000,"bank_code":"PERMATA","paid_at":"2025-07-31T03:42:51.000Z","description":"Pembelian produk KreasiLokal.id - Order ID: 23","is_high":false,"success_redirect_url":"http://localhost:8080/UMKM/statuspesanan.php?status=sukses&external_id=KREASI-1753933362-2","failure_redirect_url":"http://localhost:8080/UMKM/statuspesanan.php?status=gagal&external_id=KREASI-1753933362-2","created":"2025-07-31T03:42:46.013Z","updated":"2025-07-31T03:42:52.554Z","currency":"IDR","payment_channel":"PERMATA","payment_destination":"729388688938","payment_id":"fe72787f-aaa5-4f68-aa11-14a56d29a500"}
+
+--- Log Diterima: 2025-07-31 05:45:42 ---
+Request Body:
+{"id":"688ae6e25cf5b4d18e00760e","external_id":"KREASI-1753933533-2","user_id":"6888fcb5678cde91a6f4732f","payment_method":"BANK_TRANSFER","status":"PAID","merchant_name":"KreasiLokal","amount":315000,"paid_amount":315000,"bank_code":"PERMATA","paid_at":"2025-07-31T03:45:44.000Z","description":"Pembelian produk KreasiLokal.id - Order ID: 24","is_high":false,"success_redirect_url":"http://localhost:8080/UMKM/statuspesanan.php?status=sukses&external_id=KREASI-1753933533-2","failure_redirect_url":"http://localhost:8080/UMKM/statuspesanan.php?status=gagal&external_id=KREASI-1753933533-2","created":"2025-07-31T03:45:39.035Z","updated":"2025-07-31T03:45:44.516Z","currency":"IDR","payment_channel":"PERMATA","payment_destination":"729367470390","payment_id":"0690c1b3-a293-4986-b37c-dc09da58232f"}
+
+--- Log Diterima: 2025-07-31 05:50:03 ---
+Request Body:
+{"id":"688ae7e8b7aa506fdff601bf","external_id":"KREASI-1753933797-2","user_id":"6888fcb5678cde91a6f4732f","payment_method":"BANK_TRANSFER","status":"PAID","merchant_name":"KreasiLokal","amount":315000,"paid_amount":315000,"bank_code":"BRI","paid_at":"2025-07-31T03:50:05.000Z","description":"Pembelian produk KreasiLokal.id - Order ID: 26","is_high":false,"success_redirect_url":"http://localhost:8080/UMKM/statuspesanan.php?status=sukses&external_id=KREASI-1753933797-2","failure_redirect_url":"http://localhost:8080/UMKM/statuspesanan.php?status=gagal&external_id=KREASI-1753933797-2","created":"2025-07-31T03:50:01.210Z","updated":"2025-07-31T03:50:05.733Z","currency":"IDR","payment_channel":"BRI","payment_destination":"1328251451938","payment_id":"32588018-dedd-4c8b-bb86-033cf5a2f1c0"}
+

@@ -94,6 +94,15 @@ $totalPayment = $checkoutData['total_amount'];
 
             if (result.status === 'success') {
                 statusContainer.innerHTML = '<p style="color:green;">Mengalihkan ke halaman pembayaran...</p>';
+                
+                // Simpan data pembayaran untuk tracking
+                sessionStorage.setItem('payment_tracking', JSON.stringify({
+                    external_id: result.data.external_id,
+                    order_id: result.data.order_id,
+                    payment_method: method,
+                    timestamp: Date.now()
+                }));
+                
                 // Redirect ke invoice URL Xendit
                 window.location.href = result.data.invoice_url;
             } else {
@@ -104,6 +113,29 @@ $totalPayment = $checkoutData['total_amount'];
             statusContainer.innerHTML = `<p style="color:red;">Terjadi kesalahan koneksi: ${error.message}</p>`;
         }
     }
+
+    // Check if user came back from payment
+    window.addEventListener('focus', async function() {
+        const paymentData = sessionStorage.getItem('payment_tracking');
+        if (paymentData) {
+            const data = JSON.parse(paymentData);
+            
+            // Check if payment was made more than 30 seconds ago
+            if (Date.now() - data.timestamp > 30000) {
+                try {
+                    const response = await fetch(`ajax/ajax_handler.php?action=check_payment_status&external_id=${data.external_id}`);
+                    const result = await response.json();
+                    
+                    if (result.status === 'success' && result.data.payment_status === 'paid') {
+                        sessionStorage.removeItem('payment_tracking');
+                        window.location.href = `statuspesanan.php?status=sukses&external_id=${data.external_id}`;
+                    }
+                } catch (error) {
+                    console.error('Error checking payment status:', error);
+                }
+            }
+        }
+    });
 </script>
 </body>
 </html>

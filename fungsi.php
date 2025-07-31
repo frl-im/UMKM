@@ -238,57 +238,61 @@ function debug_session_status() {
 // GANTI FUNGSI LAMA DENGAN VERSI DEBUG INI
 function ambil_pesanan_by_status($status) {
     global $koneksi;
-    
-    // ================== ALAT DETEKSI DIMULAI ==================
-    echo "<div style='background: #111; color: #00ff00; padding: 15px; font-family: monospace; z-index: 9999; position: relative;'>";
-    echo "<h3>-- DEBUG MODE AKTIF --</h3>";
 
-    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'pembeli') {
-        echo "<strong>ERROR:</strong> Tidak ada sesi login pembeli yang valid.<br>";
-        echo "</div>";
+    if (!isset($_SESSION['user_id'])) {
         return [];
     }
-    
     $user_id = (int)$_SESSION['user_id'];
     $status_aman = mysqli_real_escape_string($koneksi, $status);
 
-    // Menampilkan user ID yang sedang login
-    echo "<strong>INFO:</strong> Mencari pesanan untuk User ID: <strong>$user_id</strong> dengan status '<strong>$status_aman</strong>'.<br>";
-
-    $query = "SELECT 
-                o.id AS order_id, o.total_amount, o.status,
-                oi.quantity, oi.price AS price_per_item,
-                p.name AS product_name, p.image_url AS product_image_path,
+    // Query ini mengambil semua item dari semua pesanan dengan status tertentu
+    $query = "SELECT
+                o.id AS order_id,
+                o.total_amount,
+                o.status AS order_status,
+                oi.quantity,
+                oi.price AS price_per_item,
+                p.id AS product_id,
+                p.name AS product_name,
+                p.image_url AS product_image_path,
                 s.store_name
               FROM orders AS o
               JOIN order_items AS oi ON o.id = oi.order_id
               JOIN products AS p ON oi.product_id = p.id
-              JOIN users AS s ON oi.seller_id = s.id
-              WHERE o.user_id = $user_id AND o.status = '$status_aman'";
-    
-    echo "<hr><strong>QUERY SQL:</strong><br><pre>$query</pre>";
-              
-    $hasil = mysqli_query($koneksi, $query);
-    
-    // Menampilkan jika ada error dari MySQL
-    if (!$hasil) {
-        echo "<strong>SQL ERROR:</strong> <span style='color: #ff0000;'>" . mysqli_error($koneksi) . "</span><br>";
-        echo "</div>";
+              JOIN users AS s ON p.seller_id = s.id
+              WHERE o.user_id = ? AND o.status = ?";
+
+    $stmt = mysqli_prepare($koneksi, $query);
+    if (!$stmt) {
+        error_log("Prepare failed in ambil_pesanan_by_status: " . mysqli_error($koneksi));
         return [];
     }
-    
-    // Menampilkan jumlah data yang ditemukan
-    $jumlah_baris = mysqli_num_rows($hasil);
-    echo "<strong>HASIL:</strong> Ditemukan <strong>$jumlah_baris</strong> baris data.<br>";
-    echo "</div>";
-    // =================== ALAT DETEKSI SELESAI ===================
-    
-    $pesanan = [];
-    while ($baris = mysqli_fetch_assoc($hasil)) {
-        $pesanan[] = $baris;
+
+    mysqli_stmt_bind_param($stmt, "is", $user_id, $status_aman);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // [DIPERBAIKI] Logika untuk mengelompokkan item ke dalam pesanan yang sesuai
+    $pesanan_terstruktur = [];
+    while ($item = mysqli_fetch_assoc($result)) {
+        $order_id = $item['order_id'];
+
+        // Jika pesanan ini belum ada di array, buat entri baru untuk pesanan tersebut
+        if (!isset($pesanan_terstruktur[$order_id])) {
+            $pesanan_terstruktur[$order_id] = [
+                'order_id'      => $order_id,
+                'total_amount'  => $item['total_amount'],
+                'order_status'  => $item['order_status'],
+                'items'         => [] // Buat array kosong untuk menampung item-itemnya
+            ];
+        }
+
+        // Tambahkan item saat ini ke dalam array 'items' dari pesanan yang sesuai
+        $pesanan_terstruktur[$order_id]['items'][] = $item;
     }
-    
-    return $pesanan;
+
+    // Kembalikan array yang sudah dikelompokkan dengan benar
+    return array_values($pesanan_terstruktur);
 }
 
 // FUNGSI BARU: Mengambil semua produk untuk ditampilkan di beranda
@@ -468,7 +472,7 @@ function ambil_isi_keranjang($user_id) {
     $uid = (int)$user_id;
     
     $query = "
-        SELECT p.id, p.name, p.price, p.image_url, p.stock, c.quantity, u.store_name 
+        SELECT p.id, p.name, p.price, p.image_url, p.stock, c.quantity, u.store_name, p.seller_id 
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
         JOIN users u ON p.seller_id = u.id
@@ -692,5 +696,94 @@ function klaim_voucher_by_id($user_id, $voucher_id) {
         return "Voucher berhasil diklaim! Cek di 'Voucher Saya'.";
     }
     return "Terjadi kesalahan saat mengklaim voucher.";
+}
+// Fungsi untuk mengambil pesanan berdasarkan status
+function log_payment_activity($external_id, $status, $message = '') {
+    global $koneksi;
+    
+    $stmt = mysqli_prepare($koneksi,
+        "INSERT INTO payment_logs (external_id, status, message, created_at) VALUES (?, ?, ?, NOW())"
+    );
+    mysqli_stmt_bind_param($stmt, "sss", $external_id, $status, $message);
+    
+    return mysqli_stmt_execute($stmt);
+}
+
+// Fungsi untuk mengirim notifikasi (bisa dikembangkan lebih lanjut)
+function send_order_notification($user_id, $order_id, $message) {
+    global $koneksi;
+    
+    $stmt = mysqli_prepare($koneksi,
+        "INSERT INTO notifications (user_id, order_id, message, type, is_read, created_at) 
+         VALUES (?, ?, ?, 'order', 0, NOW())"
+    );
+    mysqli_stmt_bind_param($stmt, "iss", $user_id, $order_id, $message);
+    
+    return mysqli_stmt_execute($stmt);
+}
+
+// Fungsi untuk mengecek apakah order bisa dibatalkan
+function can_cancel_order($order_id) {
+    global $koneksi;
+    
+    $stmt = mysqli_prepare($koneksi, 
+        "SELECT order_status, payment_status FROM orders WHERE order_id = ?"
+    );
+    mysqli_stmt_bind_param($stmt, "s", $order_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $order = mysqli_fetch_assoc($result);
+    
+    if (!$order) return false;
+    
+    // Order bisa dibatalkan jika statusnya pending atau payment_status belum paid
+    return in_array($order['order_status'], ['pending', 'confirmed']) && 
+           in_array($order['payment_status'], ['pending', 'failed']);
+}
+
+// Fungsi untuk validasi pembayaran dari Xendit
+function validate_xendit_callback($data, $verification_token = null) {
+    // Validasi basic data
+    if (!isset($data['external_id']) || !isset($data['status'])) {
+        return false;
+    }
+    
+    // Validasi token jika disediakan
+    if ($verification_token !== null) {
+        $received_token = $_SERVER['HTTP_X_CALLBACK_TOKEN'] ?? '';
+        if ($received_token !== $verification_token) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Fungsi untuk format status order dalam bahasa Indonesia
+function format_order_status($status) {
+    $status_map = [
+        'pending' => 'Menunggu Pembayaran',
+        'paid' => 'Sudah Dibayar',
+        'processing' => 'Sedang Diproses',
+        'shipped' => 'Sedang Dikirim',
+        'delivered' => 'Sudah Diterima',
+        'cancelled' => 'Dibatalkan',
+        'failed' => 'Gagal'
+    ];
+    
+    return $status_map[$status] ?? ucfirst($status);
+}
+
+// Fungsi untuk format payment status
+function format_payment_status($status) {
+    $status_map = [
+        'pending' => 'Menunggu Pembayaran',
+        'paid' => 'Sudah Dibayar',
+        'settlement' => 'Sudah Dibayar',
+        'failed' => 'Pembayaran Gagal',
+        'expired' => 'Pembayaran Kadaluarsa'
+    ];
+    
+    return $status_map[$status] ?? ucfirst($status);
 }
 ?>

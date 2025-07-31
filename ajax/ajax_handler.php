@@ -154,100 +154,178 @@ switch ($action) {
         break;
 
     case 'create_payment':
-        $checkoutData = $_SESSION['checkout_data'] ?? null;
-        if (!$checkoutData) {
-            json_response('error', 'Sesi checkout tidak ditemukan.');
+    $checkoutData = $_SESSION['checkout_data'] ?? null;
+    if (!$checkoutData) {
+        json_response('error', 'Sesi checkout tidak ditemukan atau telah kedaluwarsa. Silakan ulangi dari keranjang.');
+    }
+
+    $autoload_path = '../vendor/autoload.php';
+    if (!file_exists($autoload_path)) {
+        json_response('error', 'Composer autoload tidak ditemukan. Jalankan: composer install');
+    }
+    require_once $autoload_path;
+
+    try {
+        \Xendit\Configuration::setXenditKey('xnd_development_udQ0g57Psr0X6XRB1EpmryMle34l3opt3f3TXWzXUDFOpZ2E7A3LX7jKOkZQ4YGY');
+
+        $external_id = 'KREASI-' . time() . '-' . $current_user_id;
+        $totalAmount = (int) $checkoutData['total_amount'];
+        $paymentMethod = $_POST['payment_method'] ?? '';
+
+        if (empty($paymentMethod)) {
+            json_response('error', 'Metode pembayaran harus dipilih.');
         }
 
-        // Load Composer autoload
-        $autoload_path = '../vendor/autoload.php';
-        
-        if (!file_exists($autoload_path)) {
-            json_response('error', 'Composer autoload tidak ditemukan. Jalankan: composer install');
+        $xendit_payment_methods = [];
+        switch(strtoupper($paymentMethod)) {
+            case 'BCA': $xendit_payment_methods = ['BCA']; break;
+            case 'BNI': $xendit_payment_methods = ['BNI']; break;
+            case 'BRI': $xendit_payment_methods = ['BRI']; break;
+            case 'MANDIRI': $xendit_payment_methods = ['MANDIRI']; break;
+            case 'PERMATA': $xendit_payment_methods = ['PERMATA']; break;
+            case 'ID_SHOPEEPAY': $xendit_payment_methods = ['SHOPEEPAY']; break;
+            case 'ID_DANA': $xendit_payment_methods = ['DANA']; break;
+            case 'ID_OVO': $xendit_payment_methods = ['OVO']; break;
+            default: json_response('error', 'Metode pembayaran tidak didukung: ' . $paymentMethod);
         }
-        
-        require_once $autoload_path;
 
+        mysqli_begin_transaction($koneksi);
+        
         try {
-            // Set Xendit API Key untuk Xendit SDK versi 7.0
-            \Xendit\Configuration::setXenditKey('xnd_development_udQ0g57Psr0X6XRB1EpmryMle34l3opt3f3TXWzXUDFOpZ2E7A3LX7jKOkZQ4YGY');
-
-            $external_id = 'KREASI-' . time() . '-' . $current_user_id;
-            $totalAmount = (int) $checkoutData['total_amount'];
-            $paymentMethod = $_POST['payment_method'] ?? '';
-
-            if (empty($paymentMethod)) {
-                json_response('error', 'Metode pembayaran harus dipilih.');
+            // [DIPERBAIKI] Menyimpan ke kolom yang benar: user_id, external_id, total_amount, status, dll.
+            // Catatan: `id` akan terisi otomatis (auto-increment) dan tidak perlu dimasukkan dalam query INSERT.
+            $stmt_temp_order = mysqli_prepare($koneksi, 
+                "INSERT INTO orders (user_id, external_id, total_amount, status, payment_method, shipping_address, created_at) 
+                 VALUES (?, ?, ?, 'pending', ?, ?, NOW())"
+            );
+            
+            if ($stmt_temp_order === false) {
+                throw new Exception('Gagal menyiapkan statement SQL untuk tabel orders: ' . mysqli_error($koneksi));
             }
 
-            // Convert payment method to Xendit format
-            $xendit_payment_methods = [];
+            $shipping_address = $checkoutData['shipping_address'];
+            // [DIPERBAIKI] Melakukan bind parameter dengan tipe data yang benar.
+            mysqli_stmt_bind_param($stmt_temp_order, "isdss", 
+                $current_user_id, $external_id, $totalAmount, $paymentMethod, $shipping_address
+            );
+            mysqli_stmt_execute($stmt_temp_order);
+            $order_id = mysqli_insert_id($koneksi); // Ambil ID dari order yang baru saja dibuat.
             
-            switch(strtoupper($paymentMethod)) {
-                case 'BCA':
-                    $xendit_payment_methods = ['BCA'];
-                    break;
-                case 'BNI':
-                    $xendit_payment_methods = ['BNI'];
-                    break;
-                case 'BRI':
-                    $xendit_payment_methods = ['BRI'];
-                    break;
-                case 'MANDIRI':
-                    $xendit_payment_methods = ['MANDIRI'];
-                    break;
-                case 'PERMATA':
-                    $xendit_payment_methods = ['PERMATA'];
-                    break;
-                case 'ID_SHOPEEPAY':
-                    $xendit_payment_methods = ['SHOPEEPAY'];
-                    break;
-                case 'ID_DANA':
-                    $xendit_payment_methods = ['DANA'];
-                    break;
-                case 'ID_OVO':
-                    $xendit_payment_methods = ['OVO'];
-                    break;
-                default:
-                    json_response('error', 'Metode pembayaran tidak didukung: ' . $paymentMethod);
+            // [DIPERBAIKI] Menyimpan ke kolom yang benar: order_id, product_id, seller_id, quantity, price.
+            $stmt_temp_item = mysqli_prepare($koneksi, 
+                "INSERT INTO order_items (order_id, product_id, seller_id, quantity, price) 
+                 VALUES (?, ?, ?, ?, ?)"
+            );
+             if ($stmt_temp_item === false) {
+                throw new Exception('Gagal menyiapkan statement SQL untuk tabel order_items: ' . mysqli_error($koneksi));
             }
-
-            // Create invoice using Xendit SDK 7.0
-            $params = [ 
-                'external_id' => $external_id,
-                'amount' => $totalAmount,
-                'currency' => 'IDR',
-                'payment_methods' => $xendit_payment_methods,
-                'success_redirect_url' => 'http://localhost:8080/UMKM/pesanan.php?status=sukses&external_id=' . $external_id,
-                'failure_redirect_url' => 'http://localhost:8080/UMKM/pesanan.php?status=gagal&external_id=' . $external_id,
-                'description' => 'Pembelian produk KreasiLokal.id'
-            ];
-
-            // Use Xendit Invoice API for version 7.0
-            $apiInstance = new \Xendit\Invoice\InvoiceApi();
-            $createInvoiceRequest = new \Xendit\Invoice\CreateInvoiceRequest($params);
             
-            $invoice = $apiInstance->createInvoice($createInvoiceRequest);
+            foreach ($checkoutData['items'] as $item) {
+                // [DIPERBAIKI] Bind parameter dengan tipe data yang benar dan menyertakan seller_id.
+                mysqli_stmt_bind_param($stmt_temp_item, "iiiid", 
+                    $order_id, $item['id'], $item['seller_id'], $item['quantity'], $item['price']
+                );
+                mysqli_stmt_execute($stmt_temp_item);
+            }
             
-            // Save payment data for tracking
-            $_SESSION['payment_data'] = [
-                'external_id' => $external_id,
-                'invoice_id' => $invoice['id'],
-                'amount' => $totalAmount,
-                'payment_method' => $paymentMethod,
-                'invoice_url' => $invoice['invoice_url']
-            ];
-
-            json_response('success', 'Invoice berhasil dibuat.', [
-                'invoice_url' => $invoice['invoice_url'],
-                'external_id' => $external_id,
-                'invoice_id' => $invoice['id']
-            ]);
-
-        } catch (\Xendit\XenditSdkException $e) {
-            json_response('error', 'Xendit SDK Error: ' . $e->getMessage());
+            mysqli_commit($koneksi);
+            
         } catch (Exception $e) {
-            json_response('error', 'Error: ' . $e->getMessage());
+            mysqli_rollback($koneksi);
+            throw $e;
+        }
+
+        $user_details = get_user_by_id($current_user_id);
+        $params = [ 
+            'external_id' => $external_id,
+            'amount' => $totalAmount,
+            'currency' => 'IDR',
+            'payment_methods' => $xendit_payment_methods,
+            'success_redirect_url' => 'http://localhost:8080/UMKM/statuspesanan.php?status=sukses&external_id=' . $external_id,
+            'failure_redirect_url' => 'http://localhost:8080/UMKM/statuspesanan.php?status=gagal&external_id=' . $external_id,
+            'customer' => [
+                'given_names' => $user_details['fullname'] ?? 'Customer',
+                'email' => $user_details['email'] ?? '',
+            ],
+            'description' => 'Pembelian produk KreasiLokal.id - Order ID: ' . $order_id
+        ];
+
+        $apiInstance = new \Xendit\Invoice\InvoiceApi();
+        $createInvoiceRequest = new \Xendit\Invoice\CreateInvoiceRequest($params);
+        $invoice = $apiInstance->createInvoice($createInvoiceRequest);
+        
+        // [DIPERBAIKI] Update tabel order dengan invoice_id dari Xendit
+        // Update order dengan invoice ID
+// ... setelah $invoice = $apiInstance->createInvoice(...)
+
+// [DIPERBAIKI] Query UPDATE sekarang menyertakan 3 placeholder (?) untuk 3 kolom
+$stmt_update_invoice = mysqli_prepare($koneksi, "UPDATE orders SET xendit_invoice_id = ?, payment_url = ? WHERE id = ?");
+
+if ($stmt_update_invoice === false) {
+    throw new Exception('Gagal menyiapkan query update invoice: ' . mysqli_error($koneksi));
+}
+
+// [DIPERBAIKI] Menggunakan getter method untuk menghindari "Notice" dan lebih aman
+$invoice_id_val = $invoice->getId();
+$invoice_url_val = $invoice->getInvoiceUrl();
+
+// [DIPERBAIKI] Mengikat 3 variabel dengan tipe data 'ssi' (string, string, integer)
+mysqli_stmt_bind_param($stmt_update_invoice, "ssi", $invoice_id_val, $invoice_url_val, $order_id);
+mysqli_stmt_execute($stmt_update_invoice);
+
+$_SESSION['payment_data'] = [
+    'external_id' => $external_id, 
+    'invoice_id' => $invoice_id_val,
+    'amount' => $totalAmount, 
+    'payment_method' => $paymentMethod,
+    'invoice_url' => $invoice_url_val, 
+    'order_id' => $order_id
+];
+
+json_response('success', 'Invoice berhasil dibuat.', [
+    'invoice_url' => $invoice_url_val, 
+    'external_id' => $external_id,
+    'invoice_id' => $invoice_id_val, 
+    'order_id' => $order_id
+]);
+       
+        $_SESSION['payment_data'] = [
+            'external_id' => $external_id, 'invoice_id' => $invoice['id'],
+            'amount' => $totalAmount, 'payment_method' => $paymentMethod,
+            'invoice_url' => $invoice['invoice_url'], 'order_id' => $order_id
+        ];
+
+        json_response('success', 'Invoice berhasil dibuat.', [
+            'invoice_url' => $invoice['invoice_url'], 'external_id' => $external_id,
+            'invoice_id' => $invoice['id'], 'order_id' => $order_id
+        ]);
+
+    } catch (\Xendit\XenditSdkException $e) {
+        json_response('error', 'Xendit SDK Error: ' . $e->getMessage(), ['details' => $e->getFullError()]);
+    } catch (Exception $e) {
+        json_response('error', 'Error: ' . $e->getMessage());
+    }
+    break;
+
+    case 'check_payment_status':
+        $external_id = $_GET['external_id'] ?? '';
+        if (empty($external_id)) {
+            json_response('error', 'External ID tidak ditemukan.');
+        }
+
+        // Cek status dari database
+        $stmt = mysqli_prepare($koneksi, 
+            "SELECT order_id, payment_status, order_status FROM orders WHERE external_id = ? AND user_id = ?"
+        );
+        mysqli_stmt_bind_param($stmt, "si", $external_id, $_SESSION['user_id']);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $order = mysqli_fetch_assoc($result);
+
+        if ($order) {
+            json_response('success', 'Status ditemukan', $order);
+        } else {
+            json_response('error', 'Pesanan tidak ditemukan.');
         }
         break;
 
