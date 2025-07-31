@@ -18,7 +18,6 @@ $products = ambil_semua_produk();
 
 ?>
 
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
