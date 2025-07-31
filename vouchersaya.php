@@ -92,8 +92,8 @@ $vouchers = ambil_voucher_user($user_id);
                     <div class="list-item <?php if($voucher['is_used']) echo 'used'; ?>">
                         <div class="icon"><i class="fas fa-ticket-alt"></i></div>
                         <div class="content">
-                            <h4><?php echo safe_output($voucher['title']); ?></h4>
-                            <p><?php echo safe_output($voucher['description']); ?></p>
+                            <h4><?echo isset($voucher['title'])? $voucher['title'] : 'Judul tidak tersedia';></h4>
+                            <p><?php echo safe_output($voucher['voucher_code']); ?></p>
                             <?php if($voucher['is_used']): ?>
                                 <p style="color: #777;">Sudah digunakan</p>
                             <?php else: ?>

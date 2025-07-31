@@ -586,21 +586,7 @@ $products = ambil_semua_produk();
     </div>
   </div>
 </section>
-        <div class="product-grid">
-          <a href="detailproduk.php" class="product-card">
-            <div class="product-badge">-53%</div>
-            <div class="product-image">
-              <img src="https://ae01.alicdn.com/kf/S08f1983f38664f439ab601023a03df77c.jpg_640x640q90.jpg" alt="Lampu Anyaman" />
-            </div>
-            <div class="product-info">
-              <h4>Lampu Gantung Anyaman Bambu Handmade</h4>
-              <div class="product-price">
-                <span class="current-price">Rp 129.250</span>
-                <span class="original-price">Rp 275.000</span>
-              </div>
-              <div class="product-origin">Yogyakarta</div>
-              <div class="stock-bar">TERJUAL 50%</div>
-            </div>
+        
           </a>
         </div>
       </div>

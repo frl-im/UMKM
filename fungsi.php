@@ -908,4 +908,84 @@ function ambil_voucher_user($user_id) {
     
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
+function upload_produk($data, $files) {
+    global $koneksi;
+    start_secure_session();
+
+    // 1. Validasi Input Dasar
+    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'penjual') {
+        return ['status' => false, 'message' => 'Akses tidak sah. Silakan login sebagai penjual.'];
+    }
+
+    $required_fields = ['product_name', 'description', 'price', 'stock', 'category'];
+    foreach ($required_fields as $field) {
+        if (empty($data[$field])) {
+            return ['status' => false, 'message' => 'Semua kolom wajib diisi.'];
+        }
+    }
+
+    // 2. Sanitasi dan siapkan data
+    $seller_id      = (int)$_SESSION['user_id'];
+    $product_name   = mysqli_real_escape_string($koneksi, $data['product_name']);
+    $description    = mysqli_real_escape_string($koneksi, $data['description']);
+    $price          = (float)$data['price'];
+    $stock          = (int)$data['stock'];
+    $category       = mysqli_real_escape_string($koneksi, $data['category']);
+    $status         = 'active'; // PERBAIKAN: Tentukan status default untuk produk baru
+
+    if ($price <= 0 || $stock < 0) {
+        return ['status' => false, 'message' => 'Harga dan stok harus bernilai positif.'];
+    }
+    
+    // 3. Proses Upload Gambar
+    if (isset($files['product_image']) && $files['product_image']['error'] === UPLOAD_ERR_OK) {
+        $image = $files['product_image'];
+        $image_tmp_name = $image['tmp_name'];
+        $image_size = $image['size'];
+
+        $image_ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+        $allowed_ext = ['jpg', 'jpeg', 'png', 'gif'];
+
+        if (!in_array($image_ext, $allowed_ext)) {
+            return ['status' => false, 'message' => 'Format gambar tidak valid. Hanya JPG, JPEG, PNG, GIF yang diizinkan.'];
+        }
+
+        if ($image_size > 2000000) {
+            return ['status' => false, 'message' => 'Ukuran gambar terlalu besar. Maksimal 2MB.'];
+        }
+
+        $new_image_name = 'produk-' . uniqid() . '.' . $image_ext;
+        $upload_path = 'uploads/products/' . $new_image_name;
+        
+        if (!is_dir('uploads/products/')) {
+            mkdir('uploads/products/', 0777, true);
+        }
+
+        if (move_uploaded_file($image_tmp_name, $upload_path)) {
+            // PERBAIKAN: Tambahkan kolom `status` ke dalam query
+            $query = "INSERT INTO products (seller_id, name, description, price, stock, category, image_url, status) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+            $stmt = mysqli_prepare($koneksi, $query);
+            if ($stmt) {
+                // PERBAIKAN: Sesuaikan tipe data dan variabel yang diikat (8 total)
+                mysqli_stmt_bind_param($stmt, "issdisss", $seller_id, $product_name, $description, $price, $stock, $category, $upload_path, $status);
+                
+                if (mysqli_stmt_execute($stmt)) {
+                    return ['status' => true, 'message' => 'Produk berhasil ditambahkan!'];
+                } else {
+                    unlink($upload_path);
+                    return ['status' => false, 'message' => 'Gagal menyimpan data produk ke database. Error: ' . mysqli_stmt_error($stmt)];
+                }
+            } else {
+                 unlink($upload_path);
+                 return ['status' => false, 'message' => 'Gagal menyiapkan query database.'];
+            }
+        } else {
+            return ['status' => false, 'message' => 'Gagal mengupload gambar produk.'];
+        }
+    } else {
+        return ['status' => false, 'message' => 'Foto produk wajib diunggah.'];
+    }
+}
 ?>

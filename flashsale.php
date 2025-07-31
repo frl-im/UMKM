@@ -1,7 +1,33 @@
 <?php
 // [DINAMIS] Memuat fungsi dan mengambil data produk flash sale dari database
 require_once 'fungsi.php';
+
+// [DINAMIS] Memuat fungsi dan mengambil data produk flash sale dari database
+require_once 'fungsi.php';
 $flash_sale_products = ambil_produk_flash_sale();
+
+// Debug: Tampilkan jumlah produk sebelum filter
+echo "<!-- DEBUG: Produk sebelum filter: " . count($flash_sale_products) . " -->";
+
+// Filter produk yang memiliki ID valid
+$flash_sale_products = array_filter($flash_sale_products, function($product) {
+    return !empty($product['id']) && is_numeric($product['id']);
+});
+
+// Debug: Tampilkan jumlah produk setelah filter
+echo "<!-- DEBUG: Produk setelah filter: " . count($flash_sale_products) . " -->";
+
+// Debug: Tampilkan data produk
+foreach ($flash_sale_products as $index => $product) {
+    echo "<!-- DEBUG Produk $index: ID=" . (isset($product['id']) ? $product['id'] : 'TIDAK ADA') . ", Nama=" . (isset($product['name']) ? $product['name'] : 'TIDAK ADA') . " -->";
+}
+
+$flash_sale_products = ambil_produk_flash_sale();
+
+// Filter produk yang memiliki ID valid
+$flash_sale_products = array_filter($flash_sale_products, function($product) {
+    return !empty($product['id']) && is_numeric($product['id']);
+});
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -94,8 +120,8 @@ $flash_sale_products = ambil_produk_flash_sale();
 
         <section class="product-grid">
             <?php if (empty($flash_sale_products)): ?>
-                <div class="empty-state" style="grid-column: 1 / -1;">
-                    <i class="fas fa-store-slash"></i>
+                <div class="empty-state">
+                    <i class="fas fa-bolt"></i>
                     <p>Saat ini tidak ada produk Flash Sale yang tersedia.</p>
                 </div>
             <?php else: ?>
