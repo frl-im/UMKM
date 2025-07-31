@@ -1,6 +1,33 @@
 <?php
 // loginpenjual.php
 require 'fungsi.php';
+if (isset($_POST["dev_login"])) {
+    // Buat data user developer secara manual
+    $developer_data = [
+        'id' => 0, // ID 0 untuk developer
+        'role' => 'penjual',
+        'fullname' => 'Pembuat',
+        'email' => 'dev@kreasilokal.id',
+        'store_name' => 'Toko Developer',
+        'verification_status' => 3 // Status 3 = Aktif sepenuhnya
+    ]; 
+    start_secure_session();
+
+    // Set semua variabel session yang dibutuhkan
+    $_SESSION['user_id'] = $developer_data['id'];
+    $_SESSION['user_role'] = $developer_data['role'];
+    $_SESSION['user_name'] = $developer_data['fullname'];
+    $_SESSION['user_email'] = $developer_data['email'];
+    $_SESSION['store_name'] = $developer_data['store_name'];
+    $_SESSION['verification_status'] = $developer_data['verification_status'];
+    $_SESSION['login_time'] = time();
+    $_SESSION['last_activity'] = time();
+
+    // Arahkan langsung ke dashboard penjual
+    header("Location: profilpenjual.php");
+    exit();
+}
+
 
 if (isset($_POST["login"])) {
     if (login_user($_POST) === true) {
@@ -67,6 +94,11 @@ if (isset($_POST["login"])) {
             <button type="submit" name="login">Masuk ke Dashboard</button>
         </form>
         <p>Belum punya toko? <a href="registerpenjual.php">Daftar sebagai Penjual</a></p>
+        <form action="" method="POST" style="margin-top: 1rem;">
+            <button type="submit" name="dev_login" style="background-color: #d9534f; font-size: 0.8rem;">
+                <i class="fas fa-code"></i> Masuk sebagai Developer
+            </button>
+        </form>
     </div>
 </body>
 </html>

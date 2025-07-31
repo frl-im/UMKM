@@ -20,6 +20,23 @@ $current_user_id = $_SESSION['user_id'];
 global $koneksi;
 
 switch ($action) {
+
+ case 'pay_with_saldo':
+        $checkoutData = $_SESSION['checkout_data'] ?? null;
+        if (!$checkoutData || empty($checkoutData['items'])) {
+            json_response('error', 'Sesi checkout tidak valid atau keranjang kosong.');
+        }
+
+        $result = buat_pesanan_dengan_saldo($current_user_id, $checkoutData);
+
+        if ($result['status'] === 'success') {
+            unset($_SESSION['checkout_data']); // Hapus data checkout setelah berhasil
+            json_response('success', $result['message'], ['external_id' => $result['external_id']]);
+        } else {
+            json_response('error', $result['message'] ?? 'Gagal memproses pesanan.');
+        }
+        break;
+
     case 'send_message':
         $receiver_id = (int)($_POST['receiver_id'] ?? 0);
         $message = trim($_POST['message'] ?? '');
@@ -307,15 +324,31 @@ json_response('success', 'Invoice berhasil dibuat.', [
     }
     break;
 
+    case 'pay_with_paylater':
+        $checkoutData = $_SESSION['checkout_data'] ?? null;
+        if (!$checkoutData || empty($checkoutData['items'])) {
+            json_response('error', 'Sesi checkout tidak valid atau keranjang kosong.');
+        }
+
+        $result = buat_pesanan_dengan_paylater($current_user_id, $checkoutData);
+
+        if ($result['status'] === 'success') {
+            unset($_SESSION['checkout_data']);
+            json_response('success', $result['message'], ['external_id' => $result['external_id']]);
+        } else {
+            json_response('error', $result['message'] ?? 'Gagal memproses pesanan.');
+        }
+        break;
+
     case 'check_payment_status':
         $external_id = $_GET['external_id'] ?? '';
         if (empty($external_id)) {
             json_response('error', 'External ID tidak ditemukan.');
         }
 
-        // Cek status dari database
+        // [DIPERBAIKI] Menggunakan nama kolom yang benar: 'id' dan 'status'
         $stmt = mysqli_prepare($koneksi, 
-            "SELECT order_id, payment_status, order_status FROM orders WHERE external_id = ? AND user_id = ?"
+            "SELECT id, status FROM orders WHERE external_id = ? AND user_id = ?"
         );
         mysqli_stmt_bind_param($stmt, "si", $external_id, $_SESSION['user_id']);
         mysqli_stmt_execute($stmt);
@@ -328,8 +361,6 @@ json_response('success', 'Invoice berhasil dibuat.', [
             json_response('error', 'Pesanan tidak ditemukan.');
         }
         break;
-
-    default:
-        json_response('error', 'Action tidak valid.');
+    default: json_response('error', 'Action tidak valid.');
 }
 ?>

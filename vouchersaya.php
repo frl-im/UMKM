@@ -55,9 +55,11 @@ $vouchers = ambil_voucher_user($user_id);
 </head>
 <body>
     <nav class="navbar">
-        <a href="profilpembeli.php" class="logo">KreasiLokal.id</a>
-        <a href="voucher.php">Cari Voucher</a>
-    </nav>
+    <a href="profilpembeli.php" class="logo">KreasiLokal.id</a>
+    <a href="voucher.php" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">
+        <i class="fas fa-search"></i> Cari Voucher
+    </a>
+</nav>
     <div class="container">
         <div class="page-header">
             <i class="fas fa-tags"></i>

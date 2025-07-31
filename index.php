@@ -25,7 +25,6 @@ $products = ambil_semua_produk();
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KreasiLokal.id - Tradisi Bertemu Inovasi</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <!-- SEMUA CSS TETAP SAMA - TIDAK PERLU DIUBAH -->
   <style>
     /* Reset CSS & Font Dasar */
     * {
@@ -480,7 +479,6 @@ $products = ambil_semua_produk();
 </form>
       <div class="nav-icons">
         <?php if ($is_logged_in): ?>
-          <!-- PERBAIKAN: User sudah login - tampilkan dropdown -->
           <div class="user-dropdown">
             <a href="#" title="Profil User"><i class="fas fa-user-circle"></i></a>
             <div class="user-dropdown-content">
@@ -498,7 +496,6 @@ $products = ambil_semua_produk();
             </div>
           </div>
         <?php else: ?>
-          <!-- PERBAIKAN: User belum login - tampilkan link login -->
           <a href="login.html" title="Login / Daftar"><i class="fas fa-user-circle"></i></a>
         <?php endif; ?>
         
@@ -507,7 +504,6 @@ $products = ambil_semua_produk();
     </div>
   </header>
 
-  <!-- SEMUA KONTEN LAINNYA TETAP SAMA -->
   <main>
     <section class="promo-banner-container">
       <div class="container">
@@ -516,45 +512,82 @@ $products = ambil_semua_produk();
     </section>
 
     <section class="quick-nav-icons">
+      <div class="container">
+        <a href="voucher.php" class="quick-nav-item">
+          <i class="fas fa-tags"></i>
+          <span>Voucher</span>
+        </a>
+        <a href="games.php" class="quick-nav-item">
+          <i class="fas fa-gamepad"></i>
+          <span>Games</span>
+        </a>
+        <a href="flashsale.php" class="quick-nav-item">
+          <i class="fas fa-bolt"></i>
+          <span>Flash Sale</span>
+        </a>
+        <a href="tokopilihan.php" class="quick-nav-item">
+          <i class="fas fa-store"></i>
+          <span>Toko Pilihan</span>
+        </a>
+        <a href="kategori.php?nama=Kuliner Nusantara" class="quick-nav-item">
+          <i class="fas fa-cookie-bite"></i>
+          <span>Kuliner</span>
+        </a>
+        <a href="kategori.php" class="quick-nav-item">
+          <i class="fas fa-th-large"></i>
+          <span>Kategori</span>
+        </a>
+      </div>
+    </section>
+    <section class="flash-sale" id="flash-sale">
   <div class="container">
-    <a href="voucher.php" class="quick-nav-item">
-      <i class="fas fa-tags"></i>
-      <span>Voucher</span>
-    </a>
-    <a href="flashsale.php" class="quick-nav-item">
-      <i class="fas fa-bolt"></i>
-      <span>Flash Sale</span>
-    </a>
-    <a href="tokopilihan.php" class="quick-nav-item">
-      <i class="fas fa-store"></i>
-      <span>Toko Pilihan</span>
-    </a>
-    <a href="kategori.php?nama=Inovasi Mahasiswa" class="quick-nav-item">
-      <i class="fas fa-user-graduate"></i>
-      <span>Mahasiswa</span>
-    </a>
-    <a href="kategori.php?nama=Kuliner Nusantara" class="quick-nav-item">
-      <i class="fas fa-cookie-bite"></i>
-      <span>Kuliner</span>
-    </a>
-    <a href="kategori.php" class="quick-nav-item">
-      <i class="fas fa-th-large"></i>
-      <span>Kategori</span>
-    </a>
+    <div class="flash-sale-header">
+      <h3><i class="fas fa-bolt"></i> FLASH SALE</h3>
+      <div class="countdown-timer">
+        <i class="fas fa-clock"></i> <span id="countdown">02:28:45</span>
+      </div>
+      <a href="flashsale.php?kategori=flash_sale" class="see-all">Lihat Semua <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <?php $flash_sale_products = ambil_produk_flash_sale(); ?>
+    
+    <div class="product-grid">
+      <?php if (empty($flash_sale_products)): ?>
+        <p style="grid-column: 1 / -1; text-align: center; padding: 2rem;">Saat ini tidak ada Flash Sale.</p>
+      <?php else: ?>
+        <?php foreach ($flash_sale_products as $product): ?>
+          <?php
+            // Menghitung persen diskon untuk ditampilkan di badge
+            $original_price = $product['price'];
+            $discount_price = $product['discount_price'];
+            $discount_percentage = 0;
+            if ($original_price > 0 && $discount_price > 0) {
+                $discount_percentage = round((($original_price - $discount_price) / $original_price) * 100);
+            }
+          ?>
+          <a href="detailproduk.php?id=<?php echo $product['id']; ?>" class="product-card">
+            <?php if ($discount_percentage > 0): ?>
+              <div class="product-badge">-<?php echo $discount_percentage; ?>%</div>
+            <?php endif; ?>
+            <div class="product-image">
+              <img src="<?php echo safe_output($product['image_url']); ?>" alt="<?php echo safe_output($product['name']); ?>" />
+            </div>
+            <div class="product-info">
+              <h4><?php echo safe_output($product['name']); ?></h4>
+              <div class="product-price">
+                <span class="current-price"><?php echo format_price($discount_price); ?></span>
+                <span class="original-price"><?php echo format_price($original_price); ?></span>
+              </div>
+              <p class="product-origin">Stok: <?php echo $product['stock']; ?></p>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
   </div>
 </section>
-
-    <section class="flash-sale" id="flash-sale">
-      <div class="container">
-        <div class="flash-sale-header">
-          <h3><i class="fas fa-bolt"></i> FLASH SALE</h3>
-          <div class="countdown-timer">
-            <i class="fas fa-clock"></i> <span id="countdown">02:28:45</span>
-          </div>
-          <a href="flashsale.html" class="see-all">Lihat Semua <i class="fas fa-arrow-right"></i></a>
-        </div>
         <div class="product-grid">
-          <a href="detailproduk.html" class="product-card">
+          <a href="detailproduk.php" class="product-card">
             <div class="product-badge">-53%</div>
             <div class="product-image">
               <img src="https://ae01.alicdn.com/kf/S08f1983f38664f439ab601023a03df77c.jpg_640x640q90.jpg" alt="Lampu Anyaman" />
@@ -617,6 +650,7 @@ $products = ambil_semua_produk();
             <li><a href="about.html">Tentang Kami</a></li>
             <li><a href="kontak.html">Hubungi Kami</a></li>
             <li><a href="bantuan.html">Pusat Bantuan</a></li>
+            <li><a href="games.php">Games & Hadiah</a></li>
             <li><a href="syarat.html">Syarat & Ketentuan</a></li>
             <li><a href="privasi.html">Kebijakan Privasi</a></li>
             <li><a href="karir.html">Karir</a></li>

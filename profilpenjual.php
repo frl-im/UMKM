@@ -140,7 +140,7 @@ $status_messages = [
                     <i class="fas fa-info-circle"></i> Lengkapi Informasi Toko
                 </a>
             <?php elseif ($verification_status >= 2): ?>
-                <a href="upload_produk.php" class="action-button">
+                <a href="uploadproduk.php" class="action-button">
                     <i class="fas fa-plus"></i> Tambah Produk Baru
                 </a>
             <?php endif; ?>

@@ -27,24 +27,19 @@ function query($query) {
     return $rows;
 }
 
-// PERBAIKAN FUNGSI SESSION - Hilangkan regeneration yang bermasalah
 function start_secure_session() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
     
-    // HAPUS REGENERATION OTOMATIS - Ini yang menyebabkan masalah
-    // Hanya set last_regeneration jika belum ada
     if (!isset($_SESSION['last_regeneration'])) {
         $_SESSION['last_regeneration'] = time();
     }
 }
 
-// PERBAIKAN FUNGSI LOGIN - Pastikan last_activity di-set
 function login_user($data) {
     global $koneksi;
     
-    // Validasi input
     if (empty($data['email']) || empty($data['password'])) {
         return false;
     }
@@ -57,18 +52,15 @@ function login_user($data) {
     if (mysqli_num_rows($result) === 1) {
         $user = mysqli_fetch_assoc($result);
         if (password_verify($password, $user['password_hash'])) {
-            // Mulai session dengan aman
             start_secure_session();
             
-            // PERBAIKAN: Pastikan semua session variable di-set dengan benar
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['user_name'] = $user['fullname'];
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['login_time'] = time();
-            $_SESSION['last_activity'] = time(); // PERBAIKAN: Set last_activity
+            $_SESSION['last_activity'] = time();
             
-            // Untuk penjual, simpan juga nama toko
             if ($user['role'] == 'penjual') {
                 $_SESSION['store_name'] = $user['store_name'];
                 $_SESSION['verification_status'] = $user['verification_status'];
@@ -80,11 +72,9 @@ function login_user($data) {
     return false;
 }
 
-// PERBAIKAN FUNGSI CHECK_LOGIN - Konsistensi timeout
 function check_login($required_role = null) {
     start_secure_session();
     
-    // Cek session validity
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['login_time'])) {
         if ($required_role !== null) {
             redirect_to_login($required_role);
@@ -92,7 +82,6 @@ function check_login($required_role = null) {
         return false;
     }
     
-    // PERBAIKAN: Konsisten pakai 7200 detik (2 jam)
     if (time() - $_SESSION['login_time'] > 7200) {
         session_unset();
         session_destroy();
@@ -102,10 +91,8 @@ function check_login($required_role = null) {
         return false;
     }
     
-    // PERBAIKAN: SELALU update last_activity
     $_SESSION['last_activity'] = time();
     
-    // Role check
     if ($required_role && $_SESSION['user_role'] !== $required_role) {
         redirect_to_login($required_role);
         return false;
@@ -114,7 +101,6 @@ function check_login($required_role = null) {
     return true;
 }
 
-// SISANYA TETAP SAMA... (copy paste fungsi lainnya dari kode asli)
 function registerpembeli($data) {
     global $koneksi;
 
@@ -235,7 +221,7 @@ function debug_session_status() {
     }
     error_log("===================");
 }
-// GANTI FUNGSI LAMA DENGAN VERSI DEBUG INI
+
 function ambil_pesanan_by_status($status) {
     global $koneksi;
 
@@ -245,7 +231,6 @@ function ambil_pesanan_by_status($status) {
     $user_id = (int)$_SESSION['user_id'];
     $status_aman = mysqli_real_escape_string($koneksi, $status);
 
-    // Query ini mengambil semua item dari semua pesanan dengan status tertentu
     $query = "SELECT
                 o.id AS order_id,
                 o.total_amount,
@@ -272,30 +257,23 @@ function ambil_pesanan_by_status($status) {
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    // [DIPERBAIKI] Logika untuk mengelompokkan item ke dalam pesanan yang sesuai
     $pesanan_terstruktur = [];
     while ($item = mysqli_fetch_assoc($result)) {
         $order_id = $item['order_id'];
 
-        // Jika pesanan ini belum ada di array, buat entri baru untuk pesanan tersebut
         if (!isset($pesanan_terstruktur[$order_id])) {
             $pesanan_terstruktur[$order_id] = [
                 'order_id'      => $order_id,
                 'total_amount'  => $item['total_amount'],
                 'order_status'  => $item['order_status'],
-                'items'         => [] // Buat array kosong untuk menampung item-itemnya
+                'items'         => []
             ];
         }
-
-        // Tambahkan item saat ini ke dalam array 'items' dari pesanan yang sesuai
         $pesanan_terstruktur[$order_id]['items'][] = $item;
     }
-
-    // Kembalikan array yang sudah dikelompokkan dengan benar
     return array_values($pesanan_terstruktur);
 }
 
-// FUNGSI BARU: Mengambil semua produk untuk ditampilkan di beranda
 function ambil_semua_produk() {
     global $koneksi;
     $query = "SELECT * FROM products WHERE status = 'active' AND stock > 0 ORDER BY created_at DESC";
@@ -307,7 +285,6 @@ function ambil_semua_produk() {
     return $products;
 }
 
-// FUNGSI BARU: Mengambil satu produk berdasarkan ID untuk halaman detail
 function ambil_produk_by_id($product_id) {
     global $koneksi;
     $id = (int)$product_id;
@@ -325,20 +302,17 @@ function ambil_produk_by_id($product_id) {
     return mysqli_fetch_assoc($result);
 }
 
-// FUNGSI BARU: Menambah produk ke keranjang
 function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
     global $koneksi;
     $uid = (int)$user_id;
     $pid = (int)$product_id;
     $qty = (int)$quantity;
 
-    // Cek dulu apakah produknya ada dan stoknya cukup
     $product = ambil_produk_by_id($pid);
     if (!$product) {
         return ['status' => 'error', 'message' => 'Produk tidak ditemukan.'];
     }
 
-    // Cek apakah produk sudah ada di keranjang user
     $stmt_check = mysqli_prepare($koneksi, "SELECT quantity FROM cart WHERE user_id = ? AND product_id = ?");
     mysqli_stmt_bind_param($stmt_check, "ii", $uid, $pid);
     mysqli_stmt_execute($stmt_check);
@@ -346,7 +320,6 @@ function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
     $existing_item = mysqli_fetch_assoc($result_check);
 
     if ($existing_item) {
-        // Jika sudah ada, update quantity
         $new_quantity = $existing_item['quantity'] + $qty;
         if ($new_quantity > $product['stock']) {
             return ['status' => 'error', 'message' => 'Jumlah melebihi stok yang tersedia.'];
@@ -355,14 +328,12 @@ function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
         $stmt_update = mysqli_prepare($koneksi, "UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?");
         mysqli_stmt_bind_param($stmt_update, "iii", $new_quantity, $uid, $pid);
         
-        // PERBAIKAN: Cek apakah eksekusi berhasil
         if (mysqli_stmt_execute($stmt_update)) {
             return ['status' => 'success', 'message' => 'Jumlah produk di keranjang diperbarui!'];
         } else {
             return ['status' => 'error', 'message' => 'Gagal memperbarui keranjang.'];
         }
     } else {
-        // Jika belum ada, insert baru
         if ($qty > $product['stock']) {
             return ['status' => 'error', 'message' => 'Jumlah melebihi stok yang tersedia.'];
         }
@@ -370,7 +341,6 @@ function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
         $stmt_insert = mysqli_prepare($koneksi, "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)");
         mysqli_stmt_bind_param($stmt_insert, "iii", $uid, $pid, $qty);
 
-        // PERBAIKAN: Cek apakah eksekusi berhasil
         if (mysqli_stmt_execute($stmt_insert)) {
             return ['status' => 'success', 'message' => 'Produk berhasil ditambahkan ke keranjang!'];
         } else {
@@ -378,16 +348,14 @@ function tambah_ke_keranjang($user_id, $product_id, $quantity = 1) {
         }
     }
 }
-// FUNGSI BARU: Membuat pesanan dari keranjang
+
 function buat_pesanan_dari_keranjang($user_id, $payment_method, $shipping_address) {
     global $koneksi;
     $uid = (int)$user_id;
 
-    // Mulai transaksi
     mysqli_begin_transaction($koneksi);
 
     try {
-        // 1. Ambil semua item dari keranjang user
         $cart_query = mysqli_prepare($koneksi, "SELECT c.*, p.price, p.seller_id FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ?");
         mysqli_stmt_bind_param($cart_query, "i", $uid);
         mysqli_stmt_execute($cart_query);
@@ -397,57 +365,47 @@ function buat_pesanan_dari_keranjang($user_id, $payment_method, $shipping_addres
             throw new Exception("Keranjang kosong.");
         }
 
-        // 2. Hitung total harga
         $total_amount = 0;
         foreach ($cart_items as $item) {
             $total_amount += $item['price'] * $item['quantity'];
         }
 
-        // 3. Buat pesanan di tabel 'orders'
         $order_stmt = mysqli_prepare($koneksi, "INSERT INTO orders (user_id, total_amount, status, payment_method, shipping_address) VALUES (?, ?, 'pending', ?, ?)");
         mysqli_stmt_bind_param($order_stmt, "idss", $uid, $total_amount, $payment_method, $shipping_address);
         mysqli_stmt_execute($order_stmt);
         $order_id = mysqli_insert_id($koneksi);
 
-        // 4. Pindahkan item dari keranjang ke 'order_items'
         $order_item_stmt = mysqli_prepare($koneksi, "INSERT INTO order_items (order_id, product_id, seller_id, quantity, price) VALUES (?, ?, ?, ?, ?)");
         foreach ($cart_items as $item) {
             mysqli_stmt_bind_param($order_item_stmt, "iiiid", $order_id, $item['product_id'], $item['seller_id'], $item['quantity'], $item['price']);
             mysqli_stmt_execute($order_item_stmt);
             
-            // 5. Kurangi stok produk
             $stock_stmt = mysqli_prepare($koneksi, "UPDATE products SET stock = stock - ? WHERE id = ?");
             mysqli_stmt_bind_param($stock_stmt, "ii", $item['quantity'], $item['product_id']);
             mysqli_stmt_execute($stock_stmt);
         }
         
-        // 6. Kosongkan keranjang
         $clear_cart_stmt = mysqli_prepare($koneksi, "DELETE FROM cart WHERE user_id = ?");
         mysqli_stmt_bind_param($clear_cart_stmt, "i", $uid);
         mysqli_stmt_execute($clear_cart_stmt);
 
-        // Jika semua berhasil, commit transaksi
         mysqli_commit($koneksi);
         return ['status' => 'success', 'order_id' => $order_id];
 
     } catch (Exception $e) {
-        // Jika ada error, batalkan semua perubahan
         mysqli_rollback($koneksi);
         return ['status' => 'error', 'message' => $e->getMessage()];
     }
 }
 
-// TAMBAHKAN FUNGSI BARU INI DI FILE fungsi.php
 function ambil_daftar_percakapan($user_id, $user_role) {
     global $koneksi;
     $uid = (int)$user_id;
 
     $query = "";
     if ($user_role === 'pembeli') {
-        // Jika pembeli, tampilkan semua penjual dan admin (CS)
         $query = "SELECT id, fullname, role, store_name FROM users WHERE role = 'penjual' OR role = 'admin'";
     } elseif ($user_role === 'penjual') {
-        // Jika penjual, tampilkan hanya pembeli yang pernah mengirim pesan kepadanya
         $query = "
             SELECT DISTINCT u.id, u.fullname, u.role, u.store_name
             FROM users u
@@ -466,7 +424,6 @@ function ambil_daftar_percakapan($user_id, $user_role) {
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-// TAMBAHKAN FUNGSI INI DI DALAM FILE FUNGSI.PHP
 function ambil_isi_keranjang($user_id) {
     global $koneksi;
     $uid = (int)$user_id;
@@ -486,8 +443,6 @@ function ambil_isi_keranjang($user_id) {
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-// TAMBAHKAN FUNGSI-FUNGSI INI KE DALAM FILE FUNGSI.PHP
-
 function get_primary_address($user_id) {
     global $koneksi;
     $uid = (int)$user_id;
@@ -506,8 +461,6 @@ function apply_voucher($voucher_code) {
     return mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 }
 
-// TAMBAHKAN 3 FUNGSI INI KE DALAM FILE fungsi.php
-
 function get_all_addresses($user_id) {
     global $koneksi;
     $uid = (int)$user_id;
@@ -521,7 +474,6 @@ function add_address($user_id, $data) {
     global $koneksi;
     $uid = (int)$user_id;
 
-    // Cek apakah sudah ada alamat lain, jika tidak ada, jadikan ini utama
     $existing_addresses = get_all_addresses($uid);
     $is_primary = empty($existing_addresses) ? 1 : 0;
 
@@ -534,19 +486,15 @@ function set_primary_address($user_id, $address_id) {
     global $koneksi;
     $uid = (int)$user_id;
     $aid = (int)$address_id;
-    // Reset semua alamat lain menjadi bukan utama
     mysqli_query($koneksi, "UPDATE user_addresses SET is_primary = 0 WHERE user_id = $uid");
-    // Set alamat yang dipilih menjadi utama
     $stmt = mysqli_prepare($koneksi, "UPDATE user_addresses SET is_primary = 1 WHERE id = ? AND user_id = ?");
     mysqli_stmt_bind_param($stmt, "ii", $aid, $uid);
     return mysqli_stmt_execute($stmt);
 }
 
-// FUNGSI BARU: Mengambil produk berdasarkan kategori
 function ambil_produk_by_kategori($kategori) {
     global $koneksi;
     
-    // Menggunakan prepared statement untuk keamanan dari SQL Injection
     $stmt = mysqli_prepare($koneksi, 
         "SELECT 
             p.*, 
@@ -558,10 +506,9 @@ function ambil_produk_by_kategori($kategori) {
          ORDER BY p.created_at DESC"
     );
 
-    // Jika statement gagal disiapkan, ini akan membantu proses debug
     if ($stmt === false) {
         error_log("Prepare statement failed in ambil_produk_by_kategori: " . mysqli_error($koneksi));
-        return []; // Kembalikan array kosong jika query gagal
+        return [];
     }
 
     mysqli_stmt_bind_param($stmt, "s", $kategori);
@@ -575,15 +522,12 @@ function ambil_produk_by_kategori($kategori) {
     
     return $products;
 }
-// TAMBAHKAN SEMUA FUNGSI INI KE DALAM FILE fungsi.php
 
-// Fungsi untuk Wishlist
 function tambah_ke_wishlist($user_id, $product_id) {
     global $koneksi;
     $uid = (int)$user_id;
     $pid = (int)$product_id;
 
-    // Cek dulu agar tidak duplikat
     $stmt_check = mysqli_prepare($koneksi, "SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?");
     mysqli_stmt_bind_param($stmt_check, "ii", $uid, $pid);
     mysqli_stmt_execute($stmt_check);
@@ -610,22 +554,18 @@ function ambil_wishlist_by_user($user_id) {
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-// Fungsi untuk Toko Pilihan
 function ambil_toko_pilihan() {
     global $koneksi;
-    // Query ini hanya mengambil kolom yang pasti ada
     $query = "SELECT id, store_name, store_description FROM users WHERE role = 'penjual' AND verification_status = 'verified' LIMIT 10";
     $result = mysqli_query($koneksi, $query);
 
-    // Menambahkan pengecekan error agar tidak terjadi fatal error
     if ($result === false) {
-        return []; // Kembalikan array kosong jika query gagal
+        return [];
     }
     
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-// Fungsi untuk Voucher
 function ambil_semua_voucher() {
     global $koneksi;
     $query = "SELECT * FROM vouchers WHERE is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())";
@@ -633,17 +573,11 @@ function ambil_semua_voucher() {
     return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
-// TAMBAHKAN DUA FUNGSI INI KE DALAM FILE fungsi.php
-
-/**
- * Fungsi untuk mengklaim voucher berdasarkan kode.
- */
 function klaim_voucher_by_code($user_id, $voucher_code) {
     global $koneksi;
     $uid = (int)$user_id;
     $code = mysqli_real_escape_string($koneksi, $voucher_code);
 
-    // 1. Cari voucher berdasarkan kodenya
     $stmt_find = mysqli_prepare($koneksi, "SELECT id FROM vouchers WHERE voucher_code = ? AND is_active = 1 AND (expiry_date IS NULL OR expiry_date >= CURDATE())");
     mysqli_stmt_bind_param($stmt_find, "s", $code);
     mysqli_stmt_execute($stmt_find);
@@ -655,7 +589,6 @@ function klaim_voucher_by_code($user_id, $voucher_code) {
     }
     $voucher_id = $voucher['id'];
 
-    // 2. Cek apakah user sudah pernah klaim voucher ini
     $stmt_check = mysqli_prepare($koneksi, "SELECT id FROM user_vouchers WHERE user_id = ? AND voucher_id = ?");
     mysqli_stmt_bind_param($stmt_check, "ii", $uid, $voucher_id);
     mysqli_stmt_execute($stmt_check);
@@ -663,7 +596,6 @@ function klaim_voucher_by_code($user_id, $voucher_code) {
         return "Anda sudah pernah mengklaim voucher ini.";
     }
 
-    // 3. Tambahkan voucher ke koleksi user
     $stmt_claim = mysqli_prepare($koneksi, "INSERT INTO user_vouchers (user_id, voucher_id) VALUES (?, ?)");
     mysqli_stmt_bind_param($stmt_claim, "ii", $uid, $voucher_id);
     if (mysqli_stmt_execute($stmt_claim)) {
@@ -672,16 +604,11 @@ function klaim_voucher_by_code($user_id, $voucher_code) {
     return "Terjadi kesalahan saat mengklaim voucher.";
 }
 
-/**
- * Fungsi untuk mengambil semua voucher yang dimiliki user.
- */
-// HAPUS FUNGSI klaim_voucher_by_code DAN GANTI DENGAN INI
 function klaim_voucher_by_id($user_id, $voucher_id) {
     global $koneksi;
     $uid = (int)$user_id;
     $vid = (int)$voucher_id;
 
-    // Cek apakah user sudah pernah klaim voucher ini
     $stmt_check = mysqli_prepare($koneksi, "SELECT id FROM user_vouchers WHERE user_id = ? AND voucher_id = ?");
     mysqli_stmt_bind_param($stmt_check, "ii", $uid, $vid);
     mysqli_stmt_execute($stmt_check);
@@ -689,7 +616,6 @@ function klaim_voucher_by_id($user_id, $voucher_id) {
         return "Anda sudah pernah mengklaim voucher ini.";
     }
 
-    // Tambahkan voucher ke koleksi user
     $stmt_claim = mysqli_prepare($koneksi, "INSERT INTO user_vouchers (user_id, voucher_id) VALUES (?, ?)");
     mysqli_stmt_bind_param($stmt_claim, "ii", $uid, $vid);
     if (mysqli_stmt_execute($stmt_claim)) {
@@ -697,7 +623,7 @@ function klaim_voucher_by_id($user_id, $voucher_id) {
     }
     return "Terjadi kesalahan saat mengklaim voucher.";
 }
-// Fungsi untuk mengambil pesanan berdasarkan status
+
 function log_payment_activity($external_id, $status, $message = '') {
     global $koneksi;
     
@@ -709,7 +635,6 @@ function log_payment_activity($external_id, $status, $message = '') {
     return mysqli_stmt_execute($stmt);
 }
 
-// Fungsi untuk mengirim notifikasi (bisa dikembangkan lebih lanjut)
 function send_order_notification($user_id, $order_id, $message) {
     global $koneksi;
     
@@ -722,7 +647,6 @@ function send_order_notification($user_id, $order_id, $message) {
     return mysqli_stmt_execute($stmt);
 }
 
-// Fungsi untuk mengecek apakah order bisa dibatalkan
 function can_cancel_order($order_id) {
     global $koneksi;
     
@@ -736,19 +660,15 @@ function can_cancel_order($order_id) {
     
     if (!$order) return false;
     
-    // Order bisa dibatalkan jika statusnya pending atau payment_status belum paid
     return in_array($order['order_status'], ['pending', 'confirmed']) && 
            in_array($order['payment_status'], ['pending', 'failed']);
 }
 
-// Fungsi untuk validasi pembayaran dari Xendit
 function validate_xendit_callback($data, $verification_token = null) {
-    // Validasi basic data
     if (!isset($data['external_id']) || !isset($data['status'])) {
         return false;
     }
     
-    // Validasi token jika disediakan
     if ($verification_token !== null) {
         $received_token = $_SERVER['HTTP_X_CALLBACK_TOKEN'] ?? '';
         if ($received_token !== $verification_token) {
@@ -759,7 +679,6 @@ function validate_xendit_callback($data, $verification_token = null) {
     return true;
 }
 
-// Fungsi untuk format status order dalam bahasa Indonesia
 function format_order_status($status) {
     $status_map = [
         'pending' => 'Menunggu Pembayaran',
@@ -774,7 +693,6 @@ function format_order_status($status) {
     return $status_map[$status] ?? ucfirst($status);
 }
 
-// Fungsi untuk format payment status
 function format_payment_status($status) {
     $status_map = [
         'pending' => 'Menunggu Pembayaran',
@@ -785,5 +703,209 @@ function format_payment_status($status) {
     ];
     
     return $status_map[$status] ?? ucfirst($status);
+}
+
+function ambil_produk_flash_sale() {
+    global $koneksi;
+    $query = "SELECT * FROM products
+              WHERE status = 'active'
+                AND stock > 0
+                AND discount_price IS NOT NULL
+                AND NOW() BETWEEN flash_sale_start_date AND flash_sale_end_date
+              ORDER BY flash_sale_end_date ASC";
+
+    $result = mysqli_query($koneksi, $query);
+    $products = [];
+    if ($result) {
+        while($row = mysqli_fetch_assoc($result)) {
+            $products[] = $row;
+        }
+    }
+    return $products;
+}
+
+function get_user_wallet_info($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $stmt = mysqli_prepare($koneksi, "SELECT saldo, paylater_status, paylater_limit, paylater_balance FROM users WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    return mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+}
+
+function activate_dev_paylater($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $stmt = mysqli_prepare($koneksi, "UPDATE users SET paylater_status = 'active', paylater_limit = 5000000, paylater_balance = 5000000 WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    return mysqli_stmt_execute($stmt);
+}
+
+function buat_pesanan_dengan_saldo($user_id, $checkout_data) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $total_belanja = (float)$checkout_data['total_amount'];
+
+    mysqli_begin_transaction($koneksi);
+
+    try {
+        $stmt_user = mysqli_prepare($koneksi, "SELECT saldo FROM users WHERE id = ? FOR UPDATE");
+        mysqli_stmt_bind_param($stmt_user, "i", $uid);
+        mysqli_stmt_execute($stmt_user);
+        $user = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_user));
+
+        if (!$user || $user['saldo'] < $total_belanja) {
+            throw new Exception("Saldo tidak mencukupi.");
+        }
+
+        $new_saldo = $user['saldo'] - $total_belanja;
+        $stmt_update_saldo = mysqli_prepare($koneksi, "UPDATE users SET saldo = ? WHERE id = ?");
+        mysqli_stmt_bind_param($stmt_update_saldo, "di", $new_saldo, $uid);
+        mysqli_stmt_execute($stmt_update_saldo);
+
+        $external_id = 'SALDO-' . time() . '-' . $uid;
+        $order_id_text = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(md5($external_id), 0, 8));
+        
+        $stmt_order = mysqli_prepare($koneksi,
+            "INSERT INTO orders (user_id, external_id, total_amount, payment_method, status, shipping_address, created_at)
+             VALUES (?, ?, ?, 'saldo', 'processing', ?, NOW())"
+        );
+        mysqli_stmt_bind_param($stmt_order, "isds", $uid, $external_id, $total_belanja, $checkout_data['shipping_address']);
+        mysqli_stmt_execute($stmt_order);
+        $order_id_db = mysqli_insert_id($koneksi);
+
+        $stmt_items = mysqli_prepare($koneksi, "INSERT INTO order_items (order_id, product_id, seller_id, quantity, price) VALUES (?, ?, ?, ?, ?)");
+        foreach ($checkout_data['items'] as $item) {
+            mysqli_stmt_bind_param($stmt_items, "iiiid", $order_id_db, $item['id'], $item['seller_id'], $item['quantity'], $item['price']);
+            mysqli_stmt_execute($stmt_items);
+
+            $stmt_stock = mysqli_prepare($koneksi, "UPDATE products SET stock = stock - ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt_stock, "ii", $item['quantity'], $item['id']);
+            mysqli_stmt_execute($stmt_stock);
+        }
+
+        $stmt_clear_cart = mysqli_prepare($koneksi, "DELETE FROM cart WHERE user_id = ?");
+        mysqli_stmt_bind_param($stmt_clear_cart, "i", $uid);
+        mysqli_stmt_execute($stmt_clear_cart);
+        
+        mysqli_commit($koneksi);
+        return ['status' => 'success', 'message' => 'Pembayaran dengan saldo berhasil!', 'external_id' => $external_id];
+
+    } catch (Exception $e) {
+        mysqli_rollback($koneksi);
+        return ['status' => 'error', 'message' => $e->getMessage()];
+    }
+}
+
+function buat_pesanan_dengan_paylater($user_id, $checkout_data) {
+    global $koneksi;
+    $uid = (int)$user_id;
+    $total_belanja = (float)$checkout_data['total_amount'];
+
+    mysqli_begin_transaction($koneksi);
+
+    try {
+        $stmt_user = mysqli_prepare($koneksi, "SELECT paylater_status, paylater_balance FROM users WHERE id = ? FOR UPDATE");
+        mysqli_stmt_bind_param($stmt_user, "i", $uid);
+        mysqli_stmt_execute($stmt_user);
+        $user = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt_user));
+
+        if (!$user || $user['paylater_status'] !== 'active') {
+            throw new Exception("Paylater Anda belum aktif.");
+        }
+        if ($user['paylater_balance'] < $total_belanja) {
+            throw new Exception("Limit Paylater tidak mencukupi.");
+        }
+
+        $new_balance = $user['paylater_balance'] - $total_belanja;
+        $stmt_update_paylater = mysqli_prepare($koneksi, "UPDATE users SET paylater_balance = ? WHERE id = ?");
+        mysqli_stmt_bind_param($stmt_update_paylater, "di", $new_balance, $uid);
+        mysqli_stmt_execute($stmt_update_paylater);
+
+        $external_id = 'PAYLATER-' . time() . '-' . $uid;
+        $stmt_order = mysqli_prepare($koneksi, "INSERT INTO orders (user_id, external_id, total_amount, payment_method, status, shipping_address, created_at) VALUES (?, ?, ?, 'paylater', 'processing', ?, NOW())");
+        mysqli_stmt_bind_param($stmt_order, "isds", $uid, $external_id, $total_belanja, $checkout_data['shipping_address']);
+        mysqli_stmt_execute($stmt_order);
+        $order_id_db = mysqli_insert_id($koneksi);
+
+        $stmt_items = mysqli_prepare($koneksi, "INSERT INTO order_items (order_id, product_id, seller_id, quantity, price) VALUES (?, ?, ?, ?, ?)");
+        $stmt_stock = mysqli_prepare($koneksi, "UPDATE products SET stock = stock - ? WHERE id = ?");
+        foreach ($checkout_data['items'] as $item) {
+            mysqli_stmt_bind_param($stmt_items, "iiiid", $order_id_db, $item['id'], $item['seller_id'], $item['quantity'], $item['price']);
+            mysqli_stmt_execute($stmt_items);
+            mysqli_stmt_bind_param($stmt_stock, "ii", $item['quantity'], $item['id']);
+            mysqli_stmt_execute($stmt_stock);
+        }
+
+        $stmt_clear_cart = mysqli_prepare($koneksi, "DELETE FROM cart WHERE user_id = ?");
+        mysqli_stmt_bind_param($stmt_clear_cart, "i", $uid);
+        mysqli_stmt_execute($stmt_clear_cart);
+        
+        mysqli_commit($koneksi);
+        return ['status' => 'success', 'message' => 'Pembayaran dengan Paylater berhasil!', 'external_id' => $external_id];
+
+    } catch (Exception $e) {
+        mysqli_rollback($koneksi);
+        return ['status' => 'error', 'message' => $e->getMessage()];
+    }
+}
+
+function ambil_detail_pesanan($order_id, $user_id) {
+    global $koneksi;
+    $oid = (int)$order_id;
+    $uid = (int)$user_id;
+
+    $stmt = mysqli_prepare($koneksi, "SELECT * FROM orders WHERE id = ? AND user_id = ?");
+    mysqli_stmt_bind_param($stmt, "ii", $oid, $uid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $pesanan = mysqli_fetch_assoc($result);
+
+    if (!$pesanan) {
+        return null;
+    }
+
+    $stmt_items = mysqli_prepare($koneksi,
+        "SELECT oi.quantity, oi.price, p.name, p.image_url
+         FROM order_items oi
+         JOIN products p ON oi.product_id = p.id
+         WHERE oi.order_id = ?");
+    mysqli_stmt_bind_param($stmt_items, "i", $oid);
+    mysqli_stmt_execute($stmt_items);
+    $result_items = mysqli_stmt_get_result($stmt_items);
+    
+    $pesanan['items'] = mysqli_fetch_all($result_items, MYSQLI_ASSOC);
+    
+    return $pesanan;
+}
+function ambil_voucher_user($user_id) {
+    global $koneksi;
+    $uid = (int)$user_id;
+
+    // Query ini menggabungkan tabel user_vouchers dan vouchers
+    // untuk mendapatkan detail dari setiap voucher yang sudah diklaim oleh user.
+    $query = "SELECT
+                v.voucher_code,
+                v.discount_type,
+                v.discount_value,
+                v.expiry_date,
+                uv.is_used,
+                uv.claimed_at
+              FROM user_vouchers uv
+              JOIN vouchers v ON uv.voucher_id = v.id
+              WHERE uv.user_id = ?
+              ORDER BY uv.claimed_at DESC";
+
+    $stmt = mysqli_prepare($koneksi, $query);
+    if (!$stmt) {
+        error_log("Gagal menyiapkan query di ambil_voucher_user: " . mysqli_error($koneksi));
+        return [];
+    }
+    
+    mysqli_stmt_bind_param($stmt, "i", $uid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 ?>

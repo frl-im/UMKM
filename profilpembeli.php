@@ -250,6 +250,42 @@ $addresses = get_all_addresses($_SESSION['user_id']);
             font-weight: 500;
             text-align: center;
         }
+        /* [BARU] Sub-Navigation Bar */
+        .sub-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .sub-nav a {
+            background: #f8f9fa;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+
+        .sub-nav a i {
+            font-size: 1.5rem;
+            color: #34A853;
+            width: 30px;
+            text-align: center;
+        }
+
+        .sub-nav a:hover {
+            background: rgba(52, 168, 83, 0.05);
+            color: #34A853;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 168, 83, 0.1);
+            border-color: #34A853;
+        }
 
         /* Address Section */
         .address-list {
@@ -495,45 +531,84 @@ $addresses = get_all_addresses($_SESSION['user_id']);
             <div class="section-title">
                 <h3><i class="fas fa-wallet"></i> Dompet Saya</h3>
             </div>
-            <div class="icon-grid">
-                <a href="saldo.php" class="icon-item">
-                    <i class="fas fa-money-bill-wave icon"></i>
+            <div class="sub-nav">
+                <a href="saldo.php">
+                    <i class="fas fa-money-bill-wave"></i>
                     <span>Saldo Akun</span>
                 </a>
-                <a href="#" class="icon-item">
-                    <i class="fas fa-tags icon"></i>
+                <a href="vouchersaya.php">
+                    <i class="fas fa-tags"></i>
                     <span>Voucher Saya</span>
                 </a>
-                <a href="metodepembayaran.php" class="icon-item">
-                    <i class="fas fa-credit-card icon"></i>
-                    <span>Metode Pembayaran</span>
+                <a href="paylater.php">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Paylater</span>
                 </a>
             </div>
         </div>
-
         <!-- Account Section -->
         <div id="alamat-section" class="menu-section">
             <div class="section-title">
                 <h3><i class="fas fa-user-cog"></i> Akun Saya</h3>
             </div>
-            <div class="icon-grid">
-                <a href="ubahprofil.php" class="icon-item">
-                    <i class="fas fa-user-edit icon"></i>
+             <div class="sub-nav">
+                <a href="ubahprofil.php">
+                    <i class="fas fa-user-edit"></i>
                     <span>Ubah Profil</span>
                 </a>
-                <a href="alamat.php" class="icon-item">
-                    <i class="fas fa-map-marker-alt icon"></i>
+                <a href="alamat.php">
+                    <i class="fas fa-map-marker-alt"></i>
                     <span>Alamat Pengiriman</span>
                 </a>
-                <a href="wishlist.html" class="icon-item">
-                    <i class="fas fa-heart icon"></i>
+                <a href="wishlist.php">
+                    <i class="fas fa-heart"></i>
                     <span>Wishlist</span>
                 </a>
-                <a href="keamanan.php" class="icon-item">
-                    <i class="fas fa-shield-alt icon"></i>
+                <a href="keamanan.php">
+                    <i class="fas fa-shield-alt"></i>
                     <span>Keamanan Akun</span>
                 </a>
             </div>
+            
+            <hr class="divider">
+            
+            <div class="section-header">
+                <i class="fas fa-map-marked-alt"></i>
+                Alamat Tersimpan
+            </div>
+            
+            <div class="address-list">
+                <?php if (empty($addresses)): ?>
+                    <div class="empty-state">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Anda belum memiliki alamat tersimpan.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($addresses as $address): ?>
+                        <div class="address-item <?php if($address['is_primary']) echo 'primary'; ?>">
+                            <strong><?php echo safe_output($address['label']); ?></strong>
+                            <span style="color: #6c757d; font-weight: normal;">- <?php echo safe_output($address['recipient_name']); ?></span>
+                            <p>
+                                <i class="fas fa-phone" style="color: #34A853; margin-right: 0.5rem;"></i>
+                                <?php echo safe_output($address['phone']); ?><br>
+                                <i class="fas fa-map-marker-alt" style="color: #34A853; margin-right: 0.5rem;"></i>
+                                <?php echo safe_output($address['full_address']); ?>
+                            </p>
+                            <?php if (!$address['is_primary']): ?>
+                                <a href="profilpembeli.php?set_primary=<?php echo $address['id']; ?>#alamat-section">
+                                    <i class="fas fa-star"></i> Jadikan Alamat Utama
+                                </a>
+                            <?php else: ?>
+                                <span class="primary-badge">
+                                    <i class="fas fa-check-circle"></i>
+                                    Alamat Utama
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
             
             <hr class="divider">
             
